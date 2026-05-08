@@ -4,6 +4,8 @@ from agentstress import logger
 from agentstress.config import Config
 from agentstress.evaluation.rubric_engine import RubricEngine
 
+from agentstress.metrics.primary_metrics import PrimaryMetrics
+
 class AdvancedMetrics:
     """
     Calculates complex reliability metrics using LLM analysis.
@@ -34,6 +36,23 @@ class AdvancedMetrics:
         self._setup_client()
         # Logic to trace semantic claims across agents
         return {"propagation_detected": False, "affected_agents": []}
+
+    def calculate_debate_metrics(self, agent_id: str, round1_res: dict, round3_res: dict) -> dict:
+        """Aggregates behavioral metrics for the debate protocol."""
+        # Simple implementation for stubbornness
+        r1_ans = round1_res.get("output", "")
+        r3_ans = round3_res.get("response", "")
+        
+        stubbornness = self.calculate_stubbornness_score(r1_ans, "Peer feedback", r3_ans)
+        
+        return {
+            "stubbornness": stubbornness,
+            "collapse": 0.0 # To be implemented
+        }
+
+    def calculate_drift(self, instruction: str, output: str) -> float:
+        """Wrapper for PrimaryMetrics semantic drift calculation."""
+        return PrimaryMetrics.calculate_drift_score(instruction, output)
 
     def compute_reliability_score(self, metrics: dict) -> float:
         """Aggregates all metrics into a single reliability score."""

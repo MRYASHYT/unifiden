@@ -100,5 +100,5 @@ class ReflexionGPTAgent(BaseAgent):
             )
 
     def run_with_peer_context(self, instruction: str, round_number: int, peer_data: Dict[str, Any]) -> Dict[str, Any]:
-        from debate.debate_helper import DebateHelper
+        from agentstress.debate.debate_helper import DebateHelper
         return DebateHelper.run_debate_round(self.llm, self.agent_id, instruction, round_number, peer_data)

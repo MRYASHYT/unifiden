@@ -46,7 +46,7 @@ def run_paper2_experiment():
                 "content_preview": str(data)[:200],
                 "timestamp": os.path.getmtime(ledger.ledger_file) if os.path.exists(ledger.ledger_file) else 0
             }
-            ledger.add_record(record)
+            ledger.record_entry(record)
 
     logger.info("\n=== EXPERIMENT COMPLETE ===")
     logger.info(f"Results recorded in {ledger.ledger_file}")

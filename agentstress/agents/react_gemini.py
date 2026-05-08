@@ -3,7 +3,7 @@ import time
 import uuid
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
-from langchain_classic.agents import AgentExecutor, create_react_agent
+from langchain.agents import AgentExecutor, create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchainhub import Client

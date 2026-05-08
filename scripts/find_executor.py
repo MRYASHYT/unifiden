@@ -14,5 +14,4 @@ def find_class_in_package(package_name, class_name):
 if __name__ == "__main__":
     # This might be slow
     print("Searching for create_react_agent...")
-    find_class_in_package('langchain_classic', 'create_react_agent')
     find_class_in_package('langchain', 'create_react_agent')

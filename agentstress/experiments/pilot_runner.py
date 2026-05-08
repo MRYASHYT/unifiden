@@ -62,7 +62,7 @@ def run_pilot():
     
     # 6. Secure Logging
     logger.info("Recording Signed Result to Ledger...")
-    signature = ledger.add_record(result_record)
+    signature = ledger.record_entry(result_record)
     
     # 7. Final Summary
     logger.info("--- Pilot Run Complete ---")

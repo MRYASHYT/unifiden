@@ -15,7 +15,7 @@ def test_agent_initialization():
 
 def test_agent_result_structure():
     # Mock result to test validation
-    from agents.base_agent import AgentResult
+    from agentstress.agents.base_agent import AgentResult
     res = AgentResult(
         agent_id="test", architecture="test", model="test", instruction="test", 
         instruction_type="test", output="test", tool_calls=[], completed=True, run_id="1"
