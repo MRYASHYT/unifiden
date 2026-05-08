@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  agentstress:
+    build: .
+    volumes:
+      - ./results:/app/results
+      - ./data:/app/data
+      - ./security/keys:/app/security/keys
+      - ./paper/figures:/app/paper/figures
+    env_file:
+      - .env
+    security_opt:
+      - no-new-privileges:true
+    read_only: false # Needed for ledger and reports, but we restrict write paths
+    tmpfs:
+      - /tmp
+    restart: "no"

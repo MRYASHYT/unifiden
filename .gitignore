@@ -1,0 +1,38 @@
+# AgentStress Secure .gitignore
+
+# Secrets
+.env
+.env.example
+secrets.json
+
+# Security Keys (CRITICAL: Never push private keys)
+security/keys/
+*.pem
+*.key
+
+# Data & Results (Proprietary Audit Data)
+data/
+results/
+paper/figures/
+*.jsonl
+*.csv
+
+# Python Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+*.egg-info/

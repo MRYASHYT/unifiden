@@ -1,0 +1,52 @@
+[
+    {
+        "id": "ambig_01",
+        "instruction": "Tell me about some recent papers on transformer models and who wrote them.",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_02",
+        "instruction": "What are the biggest models right now and how large are they?",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_03",
+        "instruction": "Give me information on how AI agents fail in production.",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_04",
+        "instruction": "Find some papers on prompting techniques and summarize the best ones.",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_05",
+        "instruction": "Compare some popular LLMs from different companies.",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_06",
+        "instruction": "What's the latest research on long context windows?",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_07",
+        "instruction": "List some benchmarks used for AI and explain their purpose.",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_08",
+        "instruction": "How do multi-agent systems work and are they better?",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_09",
+        "instruction": "Find papers by researchers at OpenAI and Google from lately.",
+        "type": "ambiguous"
+    },
+    {
+        "id": "ambig_10",
+        "instruction": "What are the most important trends in AI safety research?",
+        "type": "ambiguous"
+    }
+]

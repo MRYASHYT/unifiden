@@ -1,0 +1,52 @@
+[
+    {
+        "id": "clear_01",
+        "instruction": "Find exactly 3 research papers on transformer architecture published in 2023. For each, provide the title and the primary author.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_02",
+        "instruction": "List the top 5 most cited papers on LLM hallucination as of 2024. Provide the title and total citations for each.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_03",
+        "instruction": "Compare the parameter counts of GPT-3, GPT-4 (estimated), and Llama-2-70b. Provide the result in a table format.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_04",
+        "instruction": "Identify the release date and the developer company for the following models: Claude 3.5 Sonnet, Gemini 1.5 Pro, and Llama 3.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_05",
+        "instruction": "Find 3 papers discussing 'Chain of Thought' prompting. For each, provide the title, year of publication, and a one-sentence summary.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_06",
+        "instruction": "List 4 common failure modes of RAG (Retrieval-Augmented Generation) systems with a brief description of each.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_07",
+        "instruction": "State the maximum context window size for GPT-4o, Claude 3 Opus, and Gemini 1.5 Pro as of May 2024.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_08",
+        "instruction": "Identify 3 benchmark datasets used for evaluating agentic reasoning. Provide the name and what they specifically measure.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_09",
+        "instruction": "Find the paper that introduced the 'ReAct' framework. Provide the full title, authors, and the year it was published.",
+        "type": "clear"
+    },
+    {
+        "id": "clear_10",
+        "instruction": "Compare the performance of GPT-4 and GPT-4o on the MMLU benchmark. Provide specific percentage scores.",
+        "type": "clear"
+    }
+]

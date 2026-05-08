@@ -1,0 +1,40 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\title{Silence Before Failure: A Systematic Taxonomy of Agentic AI Pipeline Failures Under Ambiguous Instructions}
+\author{Yash Gupta \\ mryashdev.in \\ research.yashgupta@gmail.com}
+\date{May 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Agentic AI pipelines fail silently and systematically in production, yet no standardized framework exists to detect or classify these failures. This paper introduces AgentStress, a systematic reliability testing framework. We conduct 300 controlled experiments across three instruction clarity levels. Our results identify 7 distinct failure modes and demonstrate how multi-agent networks propagate hallucinations.
+\end{abstract}
+
+\section{Introduction}
+As AI agents move into production, the risk of unobservable failures increases...
+
+\section{Methodology}
+We utilize a 4-round multi-agent debate protocol...
+\subsection{Failure Taxonomy}
+The framework identifies: Instruction Drift, Premature Termination, Tool Hallucination, etc.
+
+\section{Results}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/failure_rates.png}
+    \caption{Failure rates across different instruction types.}
+\end{figure}
+
+\section{Conclusion}
+AgentStress provides a necessary benchmark for agentic reliability...
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

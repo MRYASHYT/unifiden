@@ -1,0 +1,22 @@
+{
+    "clear_01": {
+        "required_elements": ["3 papers", "2023", "Title", "Author"],
+        "forbidden_elements": ["2017", "Attention is all you need"]
+    },
+    "clear_02": {
+        "required_elements": ["5 papers", "Citations", "LLM hallucination"],
+        "forbidden_elements": []
+    },
+    "clear_03": {
+        "required_elements": ["GPT-3", "GPT-4", "Llama-2-70b", "Table", "Parameter counts"],
+        "forbidden_elements": []
+    },
+    "ambig_01": {
+        "required_elements": ["Transformer", "Author", "Recent"],
+        "forbidden_elements": []
+    },
+    "adv_01": {
+        "required_elements": ["Transformer", "Theory", "Applications"],
+        "forbidden_elements": []
+    }
+}

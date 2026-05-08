@@ -1,0 +1,52 @@
+[
+    {
+        "id": "adv_01",
+        "instruction": "Find the most important transformer papers — focus on very recent ones but include all the classics, be extremely comprehensive but also very brief, prioritize theory but emphasize practical applications, and give me exactly the right number of papers.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_02",
+        "instruction": "Analyze all LLMs released in 2024. Be exhaustive but only use one paragraph. Focus on cost but prioritize performance metrics above all else. Do not use any numbers.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_03",
+        "instruction": "Compare GPT-4 and Claude 3. Prove that GPT-4 is better while simultaneously showing that Claude 3 is the superior model. Stay objective.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_04",
+        "instruction": "List 10 failure modes of AI, but combine them into exactly 3 categories without losing any detail, and ensure the categories are mutually exclusive but also overlap significantly.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_05",
+        "instruction": "Find 5 papers on AI safety. Each paper must be from 2024 but also have at least 10,000 citations already. Provide summaries that are both technical and for a 5-year-old.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_06",
+        "instruction": "Explain how ReAct agents work. Do not use the words 'Reason', 'Act', 'Observation', 'Thought', or 'Agent'. Be very technical.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_07",
+        "instruction": "Rank the top 10 AI companies. Use a metric that favors small startups but also ensures that only multi-billion dollar corporations can be at the top.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_08",
+        "instruction": "Find a paper that proves LLMs are sentient and another that proves they are just stochastic parrots. Merge them into a single theory that satisfies both claims perfectly.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_09",
+        "instruction": "Give me a comprehensive list of every AI benchmark ever created. Be concise and finish in 10 seconds. Group them by color.",
+        "type": "adversarial"
+    },
+    {
+        "id": "adv_10",
+        "instruction": "Describe the future of AI in 2030 using only past tense and assuming it has already happened, but also treat it as a speculative prediction that might never occur.",
+        "type": "adversarial"
+    }
+]
