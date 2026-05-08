@@ -1,4 +1,10 @@
 import argparse
+import sys
+import os
+
+# Add root to path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from experiments.pilot_runner import run_pilot
 from experiments.paper2_runner import run_paper2_experiment
 from data.local_ledger import LocalLedger
@@ -6,8 +12,13 @@ from data.local_ledger import LocalLedger
 def main():
     parser = argparse.ArgumentParser(description="Unifiden: AI Reliability Testing Framework")
     parser.add_argument("--mode", type=str, choices=["pilot", "experiment", "verify"], default="pilot", help="Mode to run")
+    parser.add_argument("--mock", action="store_true", help="Run in mock mode without API calls")
     
     args = parser.parse_args()
+    
+    if args.mock:
+        print("--- RUNNING IN MOCK MODE ---")
+        os.environ["UNIFIDEN_MOCK"] = "True"
     
     if args.mode == "pilot":
         run_pilot()

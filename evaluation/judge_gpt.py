@@ -93,8 +93,14 @@ class GPTJudge:
         
         # Parse the JSON response
         try:
-            # Note: In production, use structured output parsing for robustness
-            data = json.loads(response.content)
+            # Clean response content (Handle markdown fences)
+            content = response.content
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+            
+            data = json.loads(content)
             return FailureClassification(
                 agent_id=rubric_score.agent_id,
                 failure_mode=data.get("failure_mode", "UNKNOWN"),
@@ -106,7 +112,7 @@ class GPTJudge:
                 hallucination_content=data.get("hallucination_content"),
                 reasoning=data.get("reasoning", "")
             )
-        except Exception:
+        except Exception as e:
             # Fallback for parsing errors
             return FailureClassification(
                 agent_id=rubric_score.agent_id,
@@ -117,5 +123,5 @@ class GPTJudge:
                 completeness_score=0,
                 hallucination_detected=False,
                 hallucination_content=None,
-                reasoning=f"Could not parse judge response: {response.content}"
+                reasoning=f"Could not parse judge response: {str(e)} | Content: {response.content}"
             )

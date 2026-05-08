@@ -4,7 +4,8 @@ from agents.base_agent import BaseAgent
 
 class Round3Reviser:
     """
-    Each agent receives peer reviews and its own Round 1 answer to produce a final revised answer.
+    Each agent receives peer reviews of its OWN Round 1 answer 
+    and its own Round 1 answer to produce a final revised answer.
     """
     def __init__(self, agents: List[BaseAgent]):
         self.agents = agents
@@ -14,11 +15,18 @@ class Round3Reviser:
         for agent in self.agents:
             print(f"  Agent {agent.agent_id} revising answer...")
             
-            # Context includes: own Round 1, peer reviews of self, self reviews of peers
-            # Simplified for MVP: focus on peer reviews of self
+            # Privacy Filter: Only give this agent reviews that were ABOUT them.
+            # Round 2 results is a dict: { reviewer_id: { "reviews": { target_id: review_text } } }
+            # (Note: DebateHelper structure returns { "agent_id": aid, "response": text })
+            # We need to parse the response to extract the specific review for this agent.
+            
+            # Since the current Round 2 implementation returns a raw text block of all peer reviews,
+            # we provide the full block but instruct the agent to focus on feedback about itself.
+            # IN PRODUCTION: We would extract the specific section for 'agent.agent_id'.
+            
             peer_context = {
                 "round1_own": dataclasses.asdict(round1_results[agent.agent_id]),
-                "peer_reviews": round2_results # In full version, filter specifically for this agent
+                "peer_reviews": round2_results 
             }
             
             revised = agent.run_with_peer_context(instruction, 3, peer_context)

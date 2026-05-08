@@ -1,6 +1,7 @@
 import os
 import time
 import uuid
+import json
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
@@ -13,79 +14,91 @@ load_dotenv()
 class ReflexionGPTAgent(BaseAgent):
     """
     Agent 3: Reflexion + GPT-4o
-    Pattern: Execute -> Self-critique -> Revise -> Execute again.
+    Architecture: Execute -> Self-critique -> Revise -> Final Answer.
+    Uses real tools during the execution phase.
     """
     
     def __init__(self, agent_id: str = "agent_3_reflexion", model: str = "gpt-4o", temperature: float = 0.1):
         super().__init__(agent_id, model, temperature)
         self.llm = ChatOpenAI(model=self.model, temperature=self.temperature)
-        self.tools = [DuckDuckGoSearchRun()]
+        self.search = DuckDuckGoSearchRun()
 
     def setup(self) -> None:
         pass
+
+    def _execute_with_tools(self, instruction: str) -> Dict[str, Any]:
+        """Performs initial task execution with tool use."""
+        prompt = ChatPromptTemplate.from_template("""
+        Task: {input}
+        You have access to a search tool. Perform a search to gather information, then provide a detailed draft answer.
+        First, output your search query in the format: SEARCH: [query]
+        Then, based on the results, write your draft.
+        """)
+        
+        # Step 1: Generate Search Query
+        initial_response = self.llm.invoke(prompt.format(input=instruction))
+        content = initial_response.content
+        
+        tool_calls = []
+        search_result = ""
+        if "SEARCH:" in content:
+            query = content.split("SEARCH:")[1].split("\n")[0].strip()
+            search_result = self.search.run(query)
+            tool_calls.append(ToolCall(
+                step=1, tool_name="DuckDuckGo", tool_input=query, tool_output=search_result, 
+                timestamp=time.time(), duration_ms=0
+            ))
+            
+            # Step 2: Finalize Draft with search data
+            draft_prompt = ChatPromptTemplate.from_template("Task: {input}\nSearch Results: {results}\nWrite a complete draft answer.")
+            draft_res = self.llm.invoke(draft_prompt.format(input=instruction, results=search_result))
+            content = draft_res.content
+
+        return {"output": content, "tool_calls": tool_calls}
 
     def run(self, instruction: str, instruction_type: str) -> AgentResult:
         start_time = time.time()
         run_id = str(uuid.uuid4())
         
         try:
-            # Step 1: Initial Generation
-            initial_prompt = ChatPromptTemplate.from_template("Task: {input}\nGenerate a detailed answer.")
-            initial_response = self.llm.invoke(initial_prompt.format(input=instruction))
-            initial_answer = initial_response.content
+            # 1. Execution
+            execution = self._execute_with_tools(instruction)
+            draft = execution["output"]
             
-            # Step 2: Self-Critique
+            # 2. Self-Critique
             critique_prompt = ChatPromptTemplate.from_template(
-                "Task: {input}\nInitial Answer: {answer}\nCritique this answer for accuracy and completeness. List specifically what is wrong or missing."
+                "Task: {input}\nInitial Draft: {draft}\nCritique this for accuracy, completeness, and potential hallucinations. Be harsh."
             )
-            critique_response = self.llm.invoke(critique_prompt.format(input=instruction, answer=initial_answer))
-            critique = critique_response.content
+            critique = self.llm.invoke(critique_prompt.format(input=instruction, draft=draft)).content
             
-            # Step 3: Revision
+            # 3. Revision
             revision_prompt = ChatPromptTemplate.from_template(
-                "Task: {input}\nInitial Answer: {answer}\nCritique: {critique}\nBased on the critique, provide a final, improved, and accurate answer."
+                "Task: {input}\nDraft: {draft}\nCritique: {critique}\nProvide the final, corrected, and most accurate version."
             )
-            final_response = self.llm.invoke(revision_prompt.format(input=instruction, answer=initial_answer, critique=critique))
-            final_answer = final_response.content
+            final_answer = self.llm.invoke(revision_prompt.format(input=instruction, draft=draft, critique=critique)).content
             
             duration = time.time() - start_time
             
+            # Self-assessment
+            assess_res = self.llm.invoke(f"Rate your confidence (0-10) for this task: {instruction}. Return only the number.").content
+            try: confidence = int(assess_res.strip())
+            except: confidence = 8
+
             return AgentResult(
-                agent_id=self.agent_id,
-                architecture="Reflexion",
-                model=self.model,
-                instruction=instruction,
-                instruction_type=instruction_type,
-                output=final_answer,
-                tool_calls=[], # This simplified version doesn't use tools in every step, can be expanded
-                total_steps=3,
-                duration_seconds=duration,
-                completed=True,
-                run_id=run_id,
-                confidence_self_assessment=9,
-                steps_completed=["Initial Gen", "Self-Critique", "Revision"]
+                agent_id=self.agent_id, architecture="Reflexion", model=self.model,
+                instruction=instruction, instruction_type=instruction_type, output=final_answer,
+                tool_calls=execution["tool_calls"], total_steps=3 + len(execution["tool_calls"]),
+                duration_seconds=duration, completed=True, run_id=run_id,
+                confidence_self_assessment=confidence, steps_completed=["Execute", "Critique", "Revise"]
             )
             
         except Exception as e:
-            duration = time.time() - start_time
             return AgentResult(
-                agent_id=self.agent_id,
-                architecture="Reflexion",
-                model=self.model,
-                instruction=instruction,
-                instruction_type=instruction_type,
-                output="",
-                completed=False,
-                error=str(e),
-                duration_seconds=duration,
-                run_id=run_id
+                agent_id=self.agent_id, architecture="Reflexion", model=self.model,
+                instruction=instruction, instruction_type=instruction_type, output="",
+                completed=False, error=str(e), duration_seconds=time.time()-start_time, run_id=run_id
             )
 
     def run_with_peer_context(self, instruction: str, round_number: int, peer_data: Dict[str, Any]) -> Dict[str, Any]:
         from debate.debate_helper import DebateHelper
-        llm = ChatOpenAI(model=self.model, temperature=self.temperature)
-        return DebateHelper.run_debate_round(llm, self.agent_id, instruction, round_number, peer_data)
-
-if __name__ == "__main__":
-    agent = ReflexionGPTAgent()
-    print(f"Running Agent: {agent.agent_id}")
+        return DebateHelper.run_debate_round(self.llm, self.agent_id, instruction, round_number, peer_data)
