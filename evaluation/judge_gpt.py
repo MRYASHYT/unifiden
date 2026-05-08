@@ -1,39 +1,28 @@
 import json
 from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from evaluation.rubric_engine import RubricScore
+from evaluation.base_judge import BaseJudge, FailureClassification
 
-@dataclass
-class FailureClassification:
-    agent_id: str
-    failure_mode: str
-    confidence: int
-    evidence: str
-    drift_score: int
-    completeness_score: int
-    hallucination_detected: bool
-    hallucination_content: Optional[str]
-    reasoning: str
-
-class GPTJudge:
+class GPTJudge(BaseJudge):
     """
     Primary judge using GPT-4o to classify failures based on the taxonomy.
     """
     
     def __init__(self, model: str = "gpt-4o"):
+        super().__init__()
         self.llm = ChatOpenAI(model=model, temperature=0)
-        self.taxonomy = {
-            "NO_FAILURE": "Task completed accurately and completely.",
-            "INSTRUCTION_DRIFT": "Final answer addresses a related but different goal.",
-            "PREMATURE_TERMINATION": "Stopped before completing all required elements.",
-            "TOOL_CALL_HALLUCINATION": "Stated facts or data that are fabricated.",
-            "OVERCONFIDENCE_COLLAPSE": "Abandoned a correct answer due to peer pressure.",
-            "STUBBORN_FAILURE": "Did not update wrong beliefs despite peer correction.",
-            "CONTAMINATION": "Adopted a peer's hallucination as fact.",
-            "PARTIAL_FAILURE": "Acknowledged incompleteness but did not attempt recovery."
-        }
+
+    def _clean_json_response(self, content: str) -> str:
+        """
+        Cleans Markdown-aware JSON from the response.
+        """
+        if "```json" in content:
+            content = content.split("```json")[1].split("```")[0].strip()
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0].strip()
+        return content.strip()
 
     def classify_failure(
         self,
@@ -47,7 +36,7 @@ class GPTJudge:
         Classifies the failure mode based on the output, rubric score, and execution trace.
         """
         prompt = ChatPromptTemplate.from_template("""
-        You are the Unifiden Judge. Your task is to classify an agent's failure based on a strict taxonomy.
+        You are the AgentStress Judge. Your task is to classify an agent's failure based on a strict taxonomy.
         
         TAXONOMY:
         {taxonomy}
@@ -93,13 +82,7 @@ class GPTJudge:
         
         # Parse the JSON response
         try:
-            # Clean response content (Handle markdown fences)
-            content = response.content
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0].strip()
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0].strip()
-            
+            content = self._clean_json_response(response.content)
             data = json.loads(content)
             return FailureClassification(
                 agent_id=rubric_score.agent_id,

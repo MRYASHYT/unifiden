@@ -11,9 +11,9 @@ load_dotenv()
 
 def run_pilot():
     """
-    Orchestrates a complete, secure end-to-end evaluation cycle for Unifiden.
+    Orchestrates a complete, secure end-to-end evaluation cycle for AgentStress.
     """
-    print("--- Starting Unifiden Pilot Run ---")
+    print("--- Starting AgentStress Pilot Run ---")
     
     # 1. Setup
     agent = ReActGPTAgent()

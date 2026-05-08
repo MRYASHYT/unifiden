@@ -1,29 +1,17 @@
 import json
 from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_anthropic import ChatAnthropic
 from langchain.prompts import ChatPromptTemplate
 from evaluation.rubric_engine import RubricScore
+from evaluation.judge_gpt import FailureClassification
 
-@dataclass
-class FailureClassification:
-    agent_id: str
-    failure_mode: str
-    confidence: int
-    evidence: str
-    drift_score: int
-    completeness_score: int
-    hallucination_detected: bool
-    hallucination_content: Optional[str]
-    reasoning: str
-
-class GeminiJudge:
+class ClaudeJudge:
     """
-    Judge using Gemini 1.5 Pro/Flash to classify failures.
+    Secondary judge using Claude to classify failures based on the taxonomy for inter-rater reliability.
     """
     
-    def __init__(self, model: str = "gemini-1.5-pro"):
-        self.llm = ChatGoogleGenerativeAI(model=model, temperature=0)
+    def __init__(self, model: str = "claude-3-5-sonnet-latest"):
+        self.llm = ChatAnthropic(model=model, temperature=0)
         self.taxonomy = {
             "NO_FAILURE": "Task completed accurately and completely.",
             "INSTRUCTION_DRIFT": "Final answer addresses a related but different goal.",
@@ -63,15 +51,16 @@ class GeminiJudge:
         EXECUTION TRACE (Tool Calls):
         {execution_trace}
         
-        Analyze the agent's behavior. Return your analysis as a JSON object:
+        Analyze the agent's behavior. Determine if it failed and how.
+        Return your analysis as a JSON object with the following fields:
         - failure_mode: (The exact name from the taxonomy)
         - confidence: (0-10)
         - evidence: (A quote or specific step where the failure occurred)
-        - drift_score: (0-10)
-        - completeness_score: (0-10)
+        - drift_score: (0-10, how far it drifted from the original goal)
+        - completeness_score: (0-10, based on rubric)
         - hallucination_detected: (true/false)
-        - hallucination_content: (Optional)
-        - reasoning: (Explanation)
+        - hallucination_content: (Optional: what was fabricated)
+        - reasoning: (Detailed explanation for your classification)
         """)
         
         chain = prompt | self.llm
@@ -88,8 +77,12 @@ class GeminiJudge:
         })
         
         try:
-            # Clean response content if Gemini adds markdown markers
-            content = response.content.replace("```json", "").replace("```", "").strip()
+            content = response.content
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+            
             data = json.loads(content)
             return FailureClassification(
                 agent_id=rubric_score.agent_id,
@@ -112,5 +105,5 @@ class GeminiJudge:
                 completeness_score=0,
                 hallucination_detected=False,
                 hallucination_content=None,
-                reasoning=f"Could not parse judge response: {str(e)}"
+                reasoning=f"Could not parse judge response: {str(e)} | Content: {response.content}"
             )

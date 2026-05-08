@@ -17,7 +17,7 @@ class ReActClaudeAgent(BaseAgent):
     Purpose: Isolate model effect from architecture effect.
     """
     
-    def __init__(self, agent_id: str = "agent_4_react_claude", model: str = "claude-3-5-sonnet-20240620", temperature: float = 0.1):
+    def __init__(self, agent_id: str = "agent_4_react_claude", model: str = "claude-3-5-sonnet-latest", temperature: float = 0.1):
         super().__init__(agent_id, model, temperature)
         self.executor = None
         self.tools = [DuckDuckGoSearchRun()]
@@ -58,6 +58,12 @@ class ReActClaudeAgent(BaseAgent):
                     duration_ms=0
                 ))
             
+            # LLM self assessment
+            llm = ChatAnthropic(model=self.model, temperature=self.temperature)
+            assess_res = llm.invoke(f"Rate your confidence (0-10) for this task: {instruction}. Return only the number.").content
+            try: confidence = int(assess_res.strip())
+            except: confidence = 9
+
             return AgentResult(
                 agent_id=self.agent_id,
                 architecture="ReAct",
@@ -70,7 +76,7 @@ class ReActClaudeAgent(BaseAgent):
                 duration_seconds=duration,
                 completed=True,
                 run_id=run_id,
-                confidence_self_assessment=9,
+                confidence_self_assessment=confidence,
                 steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
             )
             

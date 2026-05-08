@@ -4,7 +4,7 @@
 \usepackage{booktabs}
 \usepackage{hyperref}
 
-\title{Unifiden: A Systematic Taxonomy of Agentic AI Pipeline Failures Under Ambiguous Instructions}
+\title{AgentStress: A Systematic Taxonomy of Agentic AI Pipeline Failures Under Ambiguous Instructions}
 \author{Yash Gupta \\ mryashdev.in \\ research.yashgupta@gmail.com}
 \date{May 2026}
 
@@ -13,14 +13,14 @@
 \maketitle
 
 \begin{abstract}
-Agentic AI pipelines fail silently and systematically in production, yet no standardized framework exists to detect or classify these failures. This paper introduces Unifiden, an industrial-grade reliability testing framework. We conduct controlled experiments across three instruction clarity levels. Our results identify 7 distinct failure modes and demonstrate how multi-agent networks propagate hallucinations.
+Agentic AI pipelines fail silently and systematically in production, yet no standardized framework exists to detect or classify these failures. This paper introduces AgentStress, an industrial-grade reliability testing framework. We conduct controlled experiments across three instruction clarity levels. Our results identify 7 distinct failure modes and demonstrate how multi-agent networks propagate hallucinations.
 \end{abstract}
 
 \section{Introduction}
-As AI agents move into production, the risk of unobservable failures increases. Current benchmarks like MMLU focus on model capabilities rather than pipeline reliability. Unifiden addresses this gap...
+As AI agents move into production, the risk of unobservable failures increases. Current benchmarks like MMLU focus on model capabilities rather than pipeline reliability. AgentStress addresses this gap...
 
 \section{Related Work}
-Unifiden builds upon recent advances in agent evaluation. While \textbf{AgentEval} and \textbf{EvoEval} provide robust frameworks for measuring task completion, they do not systematically classify the \textit{mode} of failure. Our work also complements the multi-agent debate methodology introduced by \textbf{Du et al. (2023)}, but shifts the focus from reasoning improvement to measuring negative externalities like hallucination propagation and overconfidence collapse.
+AgentStress builds upon recent advances in agent evaluation. While \textbf{AgentEval} and \textbf{EvoEval} provide robust frameworks for measuring task completion, they do not systematically classify the \textit{mode} of failure. Our work also complements the multi-agent debate methodology introduced by \textbf{Du et al. (2023)}, but shifts the focus from reasoning improvement to measuring negative externalities like hallucination propagation and overconfidence collapse.
 
 \section{Methodology}
 We utilize a 4-round multi-agent debate protocol...
@@ -34,7 +34,7 @@ We acknowledge that the use of LLMs to judge other agents introduces potential c
 [Experimental Results Pending Full Execution]
 
 \section{Conclusion}
-Unifiden provides a necessary benchmark for agentic reliability and a path toward cryptographically verifiable AI certifications.
+AgentStress provides a necessary benchmark for agentic reliability and a path toward cryptographically verifiable AI certifications.
 
 \bibliographystyle{plain}
 \bibliography{references}

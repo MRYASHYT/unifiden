@@ -15,7 +15,7 @@ load_dotenv()
 class ReActGeminiAgent(BaseAgent):
     """
     Agent: ReAct + Gemini 1.5 Flash
-    Cost-effective alternative for testing the Unifiden framework.
+    Cost-effective alternative for testing the AgentStress framework.
     """
     
     def __init__(self, agent_id: str = "agent_gemini_react", model: str = "gemini-1.5-flash", temperature: float = 0.1):

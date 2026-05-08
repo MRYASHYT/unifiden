@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data.local_ledger import LocalLedger
 
 # --- HIGH-END CYBER AUDIT THEME ---
-st.set_page_config(page_title="UNIFIDEN // AUDIT_OS", page_icon="📟", layout="wide")
+st.set_page_config(page_title="AGENTSTRESS // AUDIT_OS", page_icon="📟", layout="wide")
 
 def apply_custom_theme():
     st.markdown("""
@@ -141,7 +141,7 @@ apply_custom_theme()
 st.markdown("""
     <div class="terminal-header">
         <div>
-            <h1 style="margin:0;">UNIFIDEN // <span style="color:#00ff41;">AUDIT_OS</span></h1>
+            <h1 style="margin:0;">AGENTSTRESS // <span style="color:#00ff41;">AUDIT_OS</span></h1>
             <p style="color:#8892b0; margin:0;">INDUSTRIAL-GRADE RELIABILITY CERTIFICATION ENGINE</p>
         </div>
         <div class="tag">V1.0.4_STABLE // SYSTEM_ONLINE</div>
@@ -161,7 +161,7 @@ with st.sidebar:
     st.markdown("### `SYSTEM_SPECS`")
     st.code("ENCLAVE: READY\nCRYPT: RSA_4096\nHASH: SHA_256\nAUTH: LOCAL_LEDGER", language="makefile")
     st.divider()
-    st.caption("© 2026 UNIFIDEN CORE")
+    st.caption("© 2026 AGENTSTRESS CORE")
 
 # Main Content
 df = load_ledger_data()

@@ -1,3 +1,4 @@
+import dataclasses
 from typing import List, Dict, Any
 from agents.base_agent import BaseAgent
 
@@ -24,5 +25,3 @@ class Round2Reviewer:
             all_reviews[reviewer.agent_id] = review
             
         return all_reviews
-
-import dataclasses # Added missing import

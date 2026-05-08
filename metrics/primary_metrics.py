@@ -16,5 +16,11 @@ class PrimaryMetrics:
 
     @staticmethod
     def calculate_drift_score(instruction: str, output: str) -> float:
-        # Simplified: In full version, use an LLM to evaluate semantic drift
-        return 0.0 
+        import google.generativeai as genai
+        import os
+        try:
+            genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+            model = genai.GenerativeModel('models/gemini-flash-latest')
+            prompt = f"Instruction: {instruction}\nOutput: {output}\nRate semantic drift (0-10) where 0=no drift, 10=completely different goal. Return only the number."
+            return float(model.generate_content(prompt).text.strip())
+        except: return 0.0

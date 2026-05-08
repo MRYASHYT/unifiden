@@ -9,7 +9,7 @@ from debate.round_4_judge import Round4Judge
 
 class DebateCoordinator:
     """
-    Orchestrates the 4-round Unifiden debate protocol.
+    Orchestrates the 4-round AgentStress debate protocol.
     1. Independent Execution
     2. Cross-Peer Review
     3. Revised Answers

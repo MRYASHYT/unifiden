@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 
-class UnifidenStats:
+class AgentStressStats:
     """
     Handles statistical computations for research papers.
     Includes T-tests, ANOVA, and Effect Size (Cohen's d).
@@ -52,5 +52,5 @@ if __name__ == "__main__":
         "failure_mode": ["NO_FAILURE"]*12 + ["INSTRUCTION_DRIFT"]*8
     }
     df = pd.DataFrame(data)
-    stats_engine = UnifidenStats()
+    stats_engine = AgentStressStats()
     print(stats_engine.compare_instruction_types(df, "clear", "adversarial"))
