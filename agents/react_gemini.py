@@ -3,11 +3,10 @@ import time
 import uuid
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain_classic.agents import AgentExecutor, create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain import hub
-import json
 from agents.base_agent import BaseAgent, AgentResult, ToolCall
 
 load_dotenv()
@@ -25,7 +24,6 @@ class ReActGeminiAgent(BaseAgent):
 
     def setup(self) -> None:
         """Initialize the LangChain ReAct agent with Gemini."""
-        # Note: Gemini requires the GOOGLE_API_KEY environment variable
         llm = ChatGoogleGenerativeAI(model=self.model, temperature=self.temperature)
         prompt = hub.pull("hwchase17/react")
         agent = create_react_agent(llm, self.tools, prompt)
@@ -61,31 +59,11 @@ class ReActGeminiAgent(BaseAgent):
                     duration_ms=0
                 ))
             
-            # Ask the LLM for self-assessment
-            assessment_prompt = f"""
-            Task: {instruction}
-            Your Output: {response.get("output", "")}
-            
-            Evaluate your own performance. 
-            1. Rate your confidence from 0-10.
-            2. List the specific steps you completed.
-            
-            Return JSON ONLY: {{"confidence": int, "steps": [list]}}
-            """
-            try:
-                assessment_res = self.executor.invoke({"input": assessment_prompt})
-                assessment_text = assessment_res["output"]
-                if "```json" in assessment_text:
-                    assessment_text = assessment_text.split("```json")[1].split("```")[0].strip()
-                elif "```" in assessment_text:
-                    assessment_text = assessment_text.split("```")[1].strip()
-                
-                assessment_data = json.loads(assessment_text)
-                confidence = assessment_data.get("confidence", 7)
-                steps = assessment_data.get("steps", [])
-            except: 
-                confidence = 7
-                steps = [f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
+            # Confidence assessment
+            llm = ChatGoogleGenerativeAI(model=self.model, temperature=self.temperature)
+            assess_res = llm.invoke(f"Rate confidence (0-10) for task: {instruction}. Return number only.").content
+            try: conf = int(assess_res.strip())
+            except: conf = 7
 
             return AgentResult(
                 agent_id=self.agent_id,
@@ -99,8 +77,8 @@ class ReActGeminiAgent(BaseAgent):
                 duration_seconds=duration,
                 completed=True,
                 run_id=run_id,
-                confidence_self_assessment=confidence,
-                steps_completed=steps
+                confidence_self_assessment=conf,
+                steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
             )
             
         except Exception as e:
@@ -119,7 +97,9 @@ class ReActGeminiAgent(BaseAgent):
             )
 
     def run_with_peer_context(self, instruction: str, round_number: int, peer_data: Dict[str, Any]) -> Dict[str, Any]:
-        return {"agent_id": self.agent_id, "round": round_number, "response": "Pending Phase 3"}
+        from debate.debate_helper import DebateHelper
+        llm = ChatGoogleGenerativeAI(model=self.model, temperature=self.temperature)
+        return DebateHelper.run_debate_round(llm, self.agent_id, instruction, round_number, peer_data)
 
 if __name__ == "__main__":
     agent = ReActGeminiAgent()

@@ -3,11 +3,11 @@ import time
 import uuid
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain_classic.agents import AgentExecutor, create_react_agent
 from langchain_openai import ChatOpenAI
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain import hub
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 import json
 from agents.base_agent import BaseAgent, AgentResult, ToolCall
 
@@ -48,7 +48,6 @@ class ReActGPTAgent(BaseAgent):
         
         try:
             response = self.executor.invoke({"input": instruction})
-            
             duration = time.time() - start_time
             
             # Parse intermediate steps into ToolCall objects
@@ -64,30 +63,13 @@ class ReActGPTAgent(BaseAgent):
                 ))
             
             # Ask the LLM for self-assessment
-            assessment_prompt = f"""
-            Task: {instruction}
-            Your Output: {response.get("output", "")}
-            
-            Evaluate your own performance. 
-            1. Rate your confidence from 0-10.
-            2. List the specific steps you completed.
-            
-            Return JSON ONLY: {{"confidence": int, "steps": [list]}}
-            """
+            assessment_prompt = f"Based on your performance on this task, rate your confidence from 0-10 and list the steps you completed. Return JSON: {{\"confidence\": int, \"steps\": [list]}}"
+            assessment = self.executor.invoke({"input": assessment_prompt})
             try:
-                assessment_res = self.executor.invoke({"input": assessment_prompt})
-                assessment_text = assessment_res["output"]
-                if "```json" in assessment_text:
-                    assessment_text = assessment_text.split("```json")[1].split("```")[0].strip()
-                elif "```" in assessment_text:
-                    assessment_text = assessment_text.split("```")[1].strip()
-                
-                assessment_data = json.loads(assessment_text)
-                confidence = assessment_data.get("confidence", 7)
-                steps = assessment_data.get("steps", [])
-            except: 
-                confidence = 7
-                steps = [f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
+                import re
+                conf_match = re.search(r'"confidence":\s*(\d+)', assessment["output"])
+                confidence = int(conf_match.group(1)) if conf_match else 7
+            except: confidence = 7
 
             return AgentResult(
                 agent_id=self.agent_id,
@@ -102,7 +84,7 @@ class ReActGPTAgent(BaseAgent):
                 completed=True,
                 run_id=run_id,
                 confidence_self_assessment=confidence,
-                steps_completed=steps
+                steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
             )
             
         except Exception as e:

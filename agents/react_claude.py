@@ -4,7 +4,7 @@ import uuid
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain_classic.agents import AgentExecutor, create_react_agent
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain import hub
 from agents.base_agent import BaseAgent, AgentResult, ToolCall

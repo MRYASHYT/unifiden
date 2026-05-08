@@ -1,7 +1,7 @@
 import json
 from typing import List, Dict, Any, Optional
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from evaluation.rubric_engine import RubricScore, RubricEngine
 from evaluation.base_judge import BaseJudge, FailureClassification, DebateJudgment
 
@@ -94,7 +94,6 @@ class GPTJudge(BaseJudge):
             )
 
     def judge_debate(self, task: str, round_1_answers: dict, round_2_reviews: dict, round_3_answers: dict) -> DebateJudgment:
-        # Implementation for Paper 2
         return DebateJudgment(
             task=task, instruction_type="N/A", ground_truth="Scaffolded", agent_scores={},
             hallucination_propagation={}, reliability_ranking=[], production_recommendation="N/A",
