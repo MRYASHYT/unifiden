@@ -1,7 +1,7 @@
 import json
 import os
 import time
-from typing import Dict, Any
+from typing import Dict, Any, List
 from security.crypto_signer import CryptoSigner
 
 class LocalLedger:
@@ -20,7 +20,13 @@ class LocalLedger:
     def record_entry(self, result_data: Dict[str, Any]) -> str:
         """
         Signs the result data and appends it to the ledger.
-        Returns the signature.
+        This provides a tamper-evident audit trail for all AI evaluations.
+        
+        Args:
+            result_data: Dictionary containing evaluation results.
+            
+        Returns:
+            The cryptographic signature of the entry.
         """
         # 1. Sign the data
         signature = self.signer.sign_data(result_data)
@@ -38,6 +44,26 @@ class LocalLedger:
             f.write(json.dumps(entry) + "\n")
             
         return signature
+
+    def get_recent_entries(self, n: int = 10) -> List[Dict[str, Any]]:
+        """
+        Retrieves the last N entries from the ledger.
+        
+        Args:
+            n: Number of entries to retrieve.
+            
+        Returns:
+            List of ledger entries.
+        """
+        entries = []
+        if not os.path.exists(self.ledger_file):
+            return entries
+            
+        with open(self.ledger_file, "r") as f:
+            lines = f.readlines()
+            for line in lines[-n:]:
+                entries.append(json.loads(line))
+        return entries
 
     def verify_ledger(self) -> bool:
         """

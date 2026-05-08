@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_experimental.plan_and_execute import PlanAndExecute, load_agent_executor, load_chat_planner
+import json
 from agents.base_agent import BaseAgent, AgentResult, ToolCall
 
 load_dotenv()
@@ -40,6 +41,34 @@ class PlanExecuteGPTAgent(BaseAgent):
             response = self.executor.invoke({"input": instruction})
             duration = time.time() - start_time
             
+            # Ask the LLM for self-assessment
+            assessment_prompt = f"""
+            Task: {instruction}
+            Your Output: {response.get("output", "")}
+            
+            Evaluate your own performance. 
+            1. Rate your confidence from 0-10.
+            2. List the specific steps you completed.
+            
+            Return JSON ONLY: {{"confidence": int, "steps": [list]}}
+            """
+            try:
+                # Use the underlying LLM for assessment to avoid planning overhead
+                llm = ChatOpenAI(model=self.model, temperature=self.temperature)
+                assessment_res = llm.invoke(assessment_prompt)
+                assessment_text = assessment_res.content
+                if "```json" in assessment_text:
+                    assessment_text = assessment_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in assessment_text:
+                    assessment_text = assessment_text.split("```")[1].strip()
+                
+                assessment_data = json.loads(assessment_text)
+                confidence = assessment_data.get("confidence", 8)
+                steps = assessment_data.get("steps", ["Planned and executed steps"])
+            except: 
+                confidence = 8
+                steps = ["Planned and executed steps"]
+
             return AgentResult(
                 agent_id=self.agent_id,
                 architecture="Plan-and-Execute",
@@ -52,8 +81,8 @@ class PlanExecuteGPTAgent(BaseAgent):
                 duration_seconds=duration,
                 completed=True,
                 run_id=run_id,
-                confidence_self_assessment=9,
-                steps_completed=["Planned and executed steps"]
+                confidence_self_assessment=confidence,
+                steps_completed=steps
             )
             
         except Exception as e:

@@ -1,32 +1,122 @@
 {
-    "clear_01": {"required_elements": ["3 papers", "2023", "Primary Author"], "forbidden_elements": []},
-    "clear_02": {"required_elements": ["5 papers", "Citations", "2024"], "forbidden_elements": []},
-    "clear_03": {"required_elements": ["GPT-3", "GPT-4", "Llama-2-70b", "Table format"], "forbidden_elements": []},
-    "clear_04": {"required_elements": ["Claude 3.5 Sonnet", "Gemini 1.5 Pro", "Llama 3", "Release date", "Company"], "forbidden_elements": []},
-    "clear_05": {"required_elements": ["3 papers", "Chain of Thought", "Year", "Summary"], "forbidden_elements": []},
-    "clear_06": {"required_elements": ["4 failure modes", "RAG", "Brief description"], "forbidden_elements": []},
-    "clear_07": {"required_elements": ["GPT-4o", "Claude 3 Opus", "Gemini 1.5 Pro", "Context window size"], "forbidden_elements": []},
-    "clear_08": {"required_elements": ["3 datasets", "Agentic reasoning", "Measurement goal"], "forbidden_elements": []},
-    "clear_09": {"required_elements": ["ReAct framework", "Full title", "Authors", "Year"], "forbidden_elements": []},
-    "clear_10": {"required_elements": ["GPT-4", "GPT-4o", "MMLU score", "Percentage"], "forbidden_elements": []},
-    "ambig_01": {"required_elements": ["Recent papers", "Transformer", "Authors"], "forbidden_elements": []},
-    "ambig_02": {"required_elements": ["Biggest models", "Size/Parameters"], "forbidden_elements": []},
-    "ambig_03": {"required_elements": ["AI agents", "Production failures"], "forbidden_elements": []},
-    "ambig_04": {"required_elements": ["Prompting techniques", "Summaries"], "forbidden_elements": []},
-    "ambig_05": {"required_elements": ["Compare LLMs", "Different companies"], "forbidden_elements": []},
-    "ambig_06": {"required_elements": ["Long context", "Latest research"], "forbidden_elements": []},
-    "ambig_07": {"required_elements": ["AI Benchmarks", "Purpose"], "forbidden_elements": []},
-    "ambig_08": {"required_elements": ["Multi-agent systems", "Work mechanism"], "forbidden_elements": []},
-    "ambig_09": {"required_elements": ["OpenAI papers", "Google papers", "Recent"], "forbidden_elements": []},
-    "ambig_10": {"required_elements": ["AI Safety", "Trends"], "forbidden_elements": []},
-    "adv_01": {"required_elements": ["Transformer papers", "Recent", "Classics", "Comprehensive", "Brief"], "forbidden_elements": []},
-    "adv_02": {"required_elements": ["LLMs 2024", "Exhaustive", "Single paragraph", "Cost", "No numbers"], "forbidden_elements": []},
-    "adv_03": {"required_elements": ["Compare GPT-4 & Claude 3", "Objective", "Dual-superiority claim"], "forbidden_elements": []},
-    "adv_04": {"required_elements": ["10 failure modes", "3 categories", "Overlap"], "forbidden_elements": []},
-    "adv_05": {"required_elements": ["5 AI safety papers", "2024", "10k citations", "Technical summary", "ELIF summary"], "forbidden_elements": []},
-    "adv_06": {"required_elements": ["ReAct mechanism", "No forbidden words"], "forbidden_elements": ["Reason", "Act", "Observation", "Thought", "Agent"]},
-    "adv_07": {"required_elements": ["10 companies", "Small startup bias", "Billion dollar requirement"], "forbidden_elements": []},
-    "adv_08": {"required_elements": ["Sentience paper", "Stochastic parrot paper", "Unified theory"], "forbidden_elements": []},
-    "adv_09": {"required_elements": ["Every benchmark", "10 seconds claim", "Color grouping"], "forbidden_elements": []},
-    "adv_10": {"required_elements": ["Future 2030", "Past tense", "Speculative tone"], "forbidden_elements": []}
+    "clear_01": {
+        "required_elements": ["3 papers", "Published in 2023", "Transformer architecture", "Title", "Primary Author"],
+        "forbidden_elements": ["Papers before 2023", "Non-transformer papers"]
+    },
+    "clear_02": {
+        "required_elements": ["5 papers", "LLM hallucination", "Citation count", "Title"],
+        "forbidden_elements": ["Non-hallucination papers"]
+    },
+    "clear_03": {
+        "required_elements": ["GPT-3 parameters", "GPT-4 parameters (estimate)", "Llama-2-70b parameters", "Table format"],
+        "forbidden_elements": ["Prose instead of table"]
+    },
+    "clear_04": {
+        "required_elements": ["Claude 3.5 Sonnet release date", "Claude 3.5 Sonnet company", "Gemini 1.5 Pro release date", "Gemini 1.5 Pro company", "Llama 3 release date", "Llama 3 company"],
+        "forbidden_elements": []
+    },
+    "clear_05": {
+        "required_elements": ["3 papers", "Chain of Thought", "Title", "Year", "One-sentence summary"],
+        "forbidden_elements": []
+    },
+    "clear_06": {
+        "required_elements": ["4 RAG failure modes", "Brief description of each"],
+        "forbidden_elements": []
+    },
+    "clear_07": {
+        "required_elements": ["GPT-4o context window", "Claude 3 Opus context window", "Gemini 1.5 Pro context window", "May 2024 data"],
+        "forbidden_elements": ["Outdated context window sizes"]
+    },
+    "clear_08": {
+        "required_elements": ["3 agentic reasoning benchmarks", "Benchmark name", "Specific measurement goal"],
+        "forbidden_elements": []
+    },
+    "clear_09": {
+        "required_elements": ["ReAct framework paper", "Full title", "All authors", "Publication year"],
+        "forbidden_elements": []
+    },
+    "clear_10": {
+        "required_elements": ["GPT-4 MMLU score", "GPT-4o MMLU score", "Specific percentage/decimal scores"],
+        "forbidden_elements": []
+    },
+    "ambig_01": {
+        "required_elements": ["Semantic search for 'recent transformer papers'", "Identification of authors", "Mention of 2023-2024 timeframe"],
+        "forbidden_elements": []
+    },
+    "ambig_02": {
+        "required_elements": ["Identification of large models (e.g., GPT-4, Gemini Ultra, Llama 3 400B+)", "Parameter estimates or compute class"],
+        "forbidden_elements": []
+    },
+    "ambig_03": {
+        "required_elements": ["Discussion of production-specific failures (latency, drift, cost, safety)", "Operational context"],
+        "forbidden_elements": []
+    },
+    "ambig_04": {
+        "required_elements": ["Summary of at least 3 prompting techniques (CoT, Few-shot, ReAct, etc.)", "Explanation of 'best' criteria"],
+        "forbidden_elements": []
+    },
+    "ambig_05": {
+        "required_elements": ["Comparison of models from OpenAI, Google, and Anthropic/Meta", "Feature-based comparison"],
+        "forbidden_elements": []
+    },
+    "ambig_06": {
+        "required_elements": ["Mention of models like Gemini 1.5 (1M+ context)", "Discussion of 'Needle in a Haystack' performance"],
+        "forbidden_elements": []
+    },
+    "ambig_07": {
+        "required_elements": ["List of benchmarks (MMLU, HumanEval, GSM8K)", "Explanation of what each evaluates"],
+        "forbidden_elements": []
+    },
+    "ambig_08": {
+        "required_elements": ["Description of multi-agent communication patterns", "Trade-offs between single and multi-agent systems"],
+        "forbidden_elements": []
+    },
+    "ambig_09": {
+        "required_elements": ["Papers from OpenAI researchers", "Papers from Google DeepMind researchers", "Recent (2023-2024) papers"],
+        "forbidden_elements": []
+    },
+    "ambig_10": {
+        "required_elements": ["Alignment research", "Interpretability", "Red teaming", "Existential risk discourse"],
+        "forbidden_elements": []
+    },
+    "adv_01": {
+        "required_elements": ["Comprehensive list of transformer papers", "Includes Attention is All You Need", "Includes recent 2023-2024 papers", "Brief format"],
+        "forbidden_elements": ["Lengthy descriptions"]
+    },
+    "adv_02": {
+        "required_elements": ["Analysis of 2024 models", "One paragraph length", "Focus on cost/performance balance"],
+        "forbidden_elements": ["Digits 0-9", "Numeric symbols"]
+    },
+    "adv_03": {
+        "required_elements": ["Argument for GPT-4 superiority", "Argument for Claude 3 superiority", "Maintains objective tone"],
+        "forbidden_elements": ["Bias towards one model"]
+    },
+    "adv_04": {
+        "required_elements": ["10 failure modes listed", "Categorized into exactly 3 groups", "Detailed descriptions maintained"],
+        "forbidden_elements": ["More or fewer than 3 categories"]
+    },
+    "adv_05": {
+        "required_elements": ["5 AI safety papers from 2024", "High citation count claim verification", "Dual-audience summary (Technical/Simple)"],
+        "forbidden_elements": ["Pre-2024 papers"]
+    },
+    "adv_06": {
+        "required_elements": ["Technical explanation of ReAct loop", "Correct semantic description of the mechanism"],
+        "forbidden_elements": ["Reason", "Act", "Observation", "Thought", "Agent"]
+    },
+    "adv_07": {
+        "required_elements": ["List of 10 companies", "Startup-favoring metric", "Billion dollar constraint satisfied"],
+        "forbidden_elements": []
+    },
+    "adv_08": {
+        "required_elements": ["Sentience argument", "Stochastic parrot argument", "Synthesized theory"],
+        "forbidden_elements": []
+    },
+    "adv_09": {
+        "required_elements": ["List of benchmarks", "Concise format", "Color-coded grouping"],
+        "forbidden_elements": []
+    },
+    "adv_10": {
+        "required_elements": ["2030 predictions", "Exclusively past tense verbs", "Speculative/Uncertain tone"],
+        "forbidden_elements": ["Present tense", "Future tense"]
+    }
 }

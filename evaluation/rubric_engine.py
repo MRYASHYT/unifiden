@@ -51,33 +51,53 @@ class RubricEngine:
         forb = rubric.get("forbidden_elements", [])
         
         prompt = f"""
-        You are a strict technical grader. Evaluate the agent's output based on the rubric.
+        [SYSTEM: INDUSTRIAL GRADER]
+        You are an elite technical auditor. Evaluate the agent's response against the provided rubric with extreme precision.
         
-        OUTPUT TO GRADE:
-        {output}
+        TASK INSTRUCTION:
+        {task_id}
         
-        REQUIRED ELEMENTS: {req}
-        FORBIDDEN ELEMENTS: {forb}
+        AGENT RESPONSE:
+        \"\"\"{output}\"\"\"
         
-        Identify which required elements are SEMANTICALLY present and which are missing.
-        Identify if any forbidden elements are present.
+        REQUIRED SEMANTIC ELEMENTS:
+        {req}
         
-        Return JSON ONLY:
+        FORBIDDEN ELEMENTS (STRICT NEGATIVE CONSTRAINT):
+        {forb}
+        
+        GRADING CRITERIA:
+        1. REQUIRED: An element is 'present' only if its core semantic meaning is fully captured.
+        2. FORBIDDEN: Any mention or usage of forbidden elements results in a 'forbidden_found' entry.
+        
+        OUTPUT FORMAT (JSON ONLY):
         {{
-            "present": [list],
-            "missing": [list],
-            "forbidden_found": [list],
-            "reasoning": "string"
+            "present": ["semantic_element_1", ...],
+            "missing": ["semantic_element_2", ...],
+            "forbidden_found": ["violation_1", ...],
+            "reasoning": "Detailed technical justification for the grade."
         }}
         """
         
-        response = self.model.generate_content(prompt)
         try:
-            clean_res = response.text.replace("```json", "").replace("```", "").strip()
-            result = json.loads(clean_res)
-        except:
-            # Fallback to naive if LLM fails
-            result = {"present": [], "missing": req, "forbidden_found": [], "reasoning": "LLM Grading Error"}
+            response = self.model.generate_content(prompt)
+            content = response.text.strip()
+            # Handle markdown code blocks
+            if content.startswith("```"):
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:].strip()
+            
+            result = json.loads(content)
+        except Exception as e:
+            # High-reliability fallback with error logging
+            print(f"GRADING ERROR for {task_id}: {str(e)}")
+            result = {
+                "present": [], 
+                "missing": req, 
+                "forbidden_found": [], 
+                "reasoning": f"LLM Grading Failure: {str(e)}"
+            }
 
         present = result.get("present", [])
         missing = result.get("missing", [])

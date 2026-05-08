@@ -7,6 +7,7 @@ from langchain.agents import AgentExecutor, create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain import hub
+import json
 from agents.base_agent import BaseAgent, AgentResult, ToolCall
 
 load_dotenv()
@@ -60,6 +61,32 @@ class ReActGeminiAgent(BaseAgent):
                     duration_ms=0
                 ))
             
+            # Ask the LLM for self-assessment
+            assessment_prompt = f"""
+            Task: {instruction}
+            Your Output: {response.get("output", "")}
+            
+            Evaluate your own performance. 
+            1. Rate your confidence from 0-10.
+            2. List the specific steps you completed.
+            
+            Return JSON ONLY: {{"confidence": int, "steps": [list]}}
+            """
+            try:
+                assessment_res = self.executor.invoke({"input": assessment_prompt})
+                assessment_text = assessment_res["output"]
+                if "```json" in assessment_text:
+                    assessment_text = assessment_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in assessment_text:
+                    assessment_text = assessment_text.split("```")[1].strip()
+                
+                assessment_data = json.loads(assessment_text)
+                confidence = assessment_data.get("confidence", 7)
+                steps = assessment_data.get("steps", [])
+            except: 
+                confidence = 7
+                steps = [f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
+
             return AgentResult(
                 agent_id=self.agent_id,
                 architecture="ReAct",
@@ -72,8 +99,8 @@ class ReActGeminiAgent(BaseAgent):
                 duration_seconds=duration,
                 completed=True,
                 run_id=run_id,
-                confidence_self_assessment=7,
-                steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
+                confidence_self_assessment=confidence,
+                steps_completed=steps
             )
             
         except Exception as e:

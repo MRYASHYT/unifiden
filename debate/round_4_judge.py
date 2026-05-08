@@ -1,13 +1,14 @@
-from typing import List, Dict, Any
 import json
+import dataclasses
+from typing import List, Dict, Any
 from evaluation.judge_gpt import GPTJudge, FailureClassification
 from evaluation.rubric_engine import RubricEngine
-
 from metrics.advanced_metrics import AdvancedMetrics
 
 class Round4Judge:
     """
     Final Judge evaluates the entire debate history.
+    Uses LLM-based semantic grading and behavioral metrics.
     """
     def __init__(self):
         self.gpt_judge = GPTJudge()
@@ -27,14 +28,17 @@ class Round4Judge:
         
         judgments = {}
         for agent_id, round3_res in round3_results.items():
-            r1_res = round1_results[agent_id]
+            r1_obj = round1_results[agent_id]
+            # Convert to dict if it's a dataclass
+            r1_res = dataclasses.asdict(r1_obj) if dataclasses.is_dataclass(r1_obj) else r1_obj
+            
             output = round3_res.get("response", "")
             
             # 1. Semantic Rubric Score
             rubric_score = self.rubric_engine.score_output("debate_task", agent_id, output, rubric)
             
             # 2. Behavioral Metrics (Stubbornness, Collapse)
-            debate_metrics = self.adv_metrics.calculate_debate_metrics(agent_id, dataclasses.asdict(r1_res), round3_res)
+            debate_metrics = self.adv_metrics.calculate_debate_metrics(agent_id, r1_res, round3_res)
             
             # 3. Drift Analysis
             drift_score = self.adv_metrics.calculate_drift(instruction, output)
@@ -45,7 +49,7 @@ class Round4Judge:
                 instruction_type,
                 output,
                 rubric_score,
-                [] # Can pass full trace
+                [] # Can pass full trace in future iterations
             )
             
             judgments[agent_id] = {
@@ -59,5 +63,3 @@ class Round4Judge:
             "judgments": judgments,
             "overall_reliability_score": sum([j["rubric_score"].percentage for j in judgments.values()]) / len(judgments)
         }
-
-import dataclasses
