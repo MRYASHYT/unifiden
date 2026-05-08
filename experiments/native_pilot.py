@@ -68,7 +68,7 @@ class SimpleGeminiJudge:
         return json.loads(content)
 
 def run_native_pilot():
-    print("--- Starting AgentStress Native Gemini Pilot ---")
+    print("--- Starting Unifiden Native Gemini Pilot ---")
     
     # 1. Setup
     agent = SimpleGeminiAgent()

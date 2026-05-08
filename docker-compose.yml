@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  agentstress:
+  unifiden:
     build: .
     volumes:
       - ./results:/app/results

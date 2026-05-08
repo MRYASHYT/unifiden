@@ -47,7 +47,7 @@ class GPTJudge:
         Classifies the failure mode based on the output, rubric score, and execution trace.
         """
         prompt = ChatPromptTemplate.from_template("""
-        You are the AgentStress Judge. Your task is to classify an agent's failure based on a strict taxonomy.
+        You are the Unifiden Judge. Your task is to classify an agent's failure based on a strict taxonomy.
         
         TAXONOMY:
         {taxonomy}

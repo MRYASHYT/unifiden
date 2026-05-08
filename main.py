@@ -4,7 +4,7 @@ from experiments.paper2_runner import run_paper2_experiment
 from data.local_ledger import LocalLedger
 
 def main():
-    parser = argparse.ArgumentParser(description="AgentStress: AI Reliability Testing Framework")
+    parser = argparse.ArgumentParser(description="Unifiden: AI Reliability Testing Framework")
     parser.add_argument("--mode", type=str, choices=["pilot", "experiment", "verify"], default="pilot", help="Mode to run")
     
     args = parser.parse_args()

@@ -18,7 +18,7 @@ def run_pilot():
     """
     Orchestrates a complete, secure end-to-end evaluation cycle using Gemini.
     """
-    print("--- Starting AgentStress Pilot Run (FULLY GEMINI POWERED) ---")
+    print("--- Starting Unifiden Pilot Run (FULLY GEMINI POWERED) ---")
     
     # 1. Setup
     agent = ReActGeminiAgent()

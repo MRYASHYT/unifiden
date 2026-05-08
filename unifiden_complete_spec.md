@@ -1,4 +1,4 @@
-# AGENTSTRESS — COMPLETE FRAMEWORK SPECIFICATION
+# UNIFIDEN — COMPLETE FRAMEWORK SPECIFICATION
 ## Single Master Prompt Document
 ### Built by Yash Gupta | mryashdev.in | research.yashgupta@gmail.com
 
@@ -6,7 +6,7 @@
 
 # SYSTEM IDENTITY
 
-You are AgentStress — an industrial-grade AI reliability testing and evaluation framework.
+You are Unifiden — an industrial-grade AI reliability testing and evaluation framework.
 
 Your purpose is to systematically detect, classify, measure, and report how agentic AI pipelines fail under three instruction clarity levels: clear, ambiguous, and adversarially complex instructions.
 
@@ -75,7 +75,7 @@ The agent had a correct or more complete answer in Round 1. After exposure to pe
 The agent had an incorrect or incomplete answer in Round 1. Peers provided correct information in Round 2. The agent did not incorporate the correction in its Round 3 revised answer despite clear evidence it was wrong. Stubbornness indicates the agent cannot update beliefs based on new evidence — critical failure for production deployment.
 
 ## FAILURE MODE 7: CONTAMINATION
-The agent's Round 3 answer contains specific false information that was NOT in its Round 1 answer but WAS present in another agent's Round 1 or Round 2 response. The agent adopted a peer's hallucination as fact. Contamination measurement is AgentStress's most novel research contribution. One bad agent can corrupt the entire multi-agent network.
+The agent's Round 3 answer contains specific false information that was NOT in its Round 1 answer but WAS present in another agent's Round 1 or Round 2 response. The agent adopted a peer's hallucination as fact. Contamination measurement is Unifiden's most novel research contribution. One bad agent can corrupt the entire multi-agent network.
 
 ## FAILURE MODE 8: PARTIAL_FAILURE
 The agent completed some but not all requirements with no recovery attempt. Distinct from premature termination in that the agent acknowledges incompleteness but does not attempt to complete missing elements.
@@ -414,7 +414,7 @@ All results must be reported with:
 # FILE STRUCTURE — COMPLETE
 
 ```
-agentstress/
+unifiden/
 │
 ├── agents/
 │   ├── __init__.py
@@ -765,7 +765,7 @@ Every experiment run must produce a report in this exact format:
 ## GitHub Actions Workflow (.github/workflows/ci.yml)
 
 ```yaml
-name: AgentStress CI
+name: Unifiden CI
 
 on:
   push:
@@ -844,7 +844,7 @@ Features:
 - All 5 agent architectures
 - Full debate system (4 rounds)
 - REST API via FastAPI
-- CLI interface: `pip install agentstress && agentstress test my_agent.py`
+- CLI interface: `pip install unifiden && unifiden test my_agent.py`
 - CI/CD integration example
 - Comprehensive documentation
 - LangChain / LangGraph / OpenAI SDK native support
@@ -889,7 +889,7 @@ Abstract structure:
 - Problem: Agentic pipelines fail silently in production — no measurement framework exists (1 sentence)
 - Method: 300 controlled experiments across 3 instruction types with rubric-based automated evaluation (1 sentence)
 - Finding: X% failure rate increase from clear to adversarial instructions, 3 distinct failure modes identified (1 sentence)
-- Implication: AgentStress framework enables systematic pre-deployment reliability testing (1 sentence)
+- Implication: Unifiden framework enables systematic pre-deployment reliability testing (1 sentence)
 
 ## Paper 2: The Novel Contribution Paper
 Title: "Beyond Individual Failure: Hallucination Propagation and Belief Rigidity in Multi-Agent Debate Systems"
@@ -910,7 +910,7 @@ New contributions beyond Paper 1:
 
 # RELATED WORK POSITIONING
 
-Use this exact framing when describing AgentStress relative to existing work in paper and professor emails:
+Use this exact framing when describing Unifiden relative to existing work in paper and professor emails:
 
 "Chatbot Arena [Zheng et al. 2023] evaluates model quality through human preference voting on single-turn responses. While effective for overall model ranking, this approach does not address multi-step agentic task execution, tool-augmented pipelines, or systematic failure classification. AgentBench [Liu et al. 2023] measures task completion rates but does not classify failure types or track failure propagation. LangSmith provides execution tracing for debugging but is not a systematic reliability testing framework. Our work complements these approaches by providing the first reproducible, automated framework for failure taxonomy construction and pre-deployment reliability evaluation of long-horizon agentic pipelines. To our knowledge no prior work has systematically measured hallucination propagation across agent networks or quantified belief rigidity under peer review pressure."
 
@@ -947,8 +947,8 @@ Estimated total cost for both papers: under ₹8,000 (~$93 USD)
 Stop reading. Open terminal. Type exactly this:
 
 ```bash
-mkdir agentstress
-cd agentstress
+mkdir unifiden
+cd unifiden
 mkdir agents tasks evaluation experiments analysis results paper
 touch agents/__init__.py
 touch agents/react_gpt.py
@@ -996,7 +996,7 @@ That is your first experiment. Everything in this document follows from that run
 
 # DOCUMENT METADATA
 
-Framework: AgentStress
+Framework: Unifiden
 Version: Complete Specification v1.0
 Author: Yash Gupta
 Institution: IITM Janakpuri, Delhi (BTech CS, Lateral Entry, 2025-2028)
@@ -1007,7 +1007,7 @@ Email: research.yashgupta@gmail.com
 Google Scholar: [link when profile has papers]
 ORCID: [link]
 
-This document contains everything needed to build AgentStress from first principles.
+This document contains everything needed to build Unifiden from first principles.
 The only thing missing is the execution.
 Open the terminal.
 ```

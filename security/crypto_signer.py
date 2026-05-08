@@ -7,7 +7,7 @@ import os
 
 class CryptoSigner:
     """
-    Handles cryptographic signing and verification for AgentStress reports.
+    Handles cryptographic signing and verification for Unifiden reports.
     Provides the foundation for 'Above Industry Standard' trust and transparency.
     """
     

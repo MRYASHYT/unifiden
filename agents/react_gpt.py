@@ -16,7 +16,7 @@ load_dotenv()
 class ReActGPTAgent(BaseAgent):
     """
     Agent 1: ReAct + GPT-4o
-    Baseline production architecture for the AgentStress framework.
+    Baseline production architecture for the Unifiden framework.
     """
     
     def __init__(self, agent_id: str = "agent_1_react_gpt4o", model: str = "gpt-4o", temperature: float = 0.1):

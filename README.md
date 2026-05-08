@@ -1,4 +1,4 @@
-# AgentStress Framework
+# Unifiden Framework
 
 Industrial-grade AI reliability testing and evaluation framework with cryptographic certification.
 
@@ -30,7 +30,7 @@ python main.py --mode verify
 ```
 
 ## Security
-AgentStress implements an "Above Industry Standard" security architecture:
+Unifiden implements an "Above Industry Standard" security architecture:
 - **Local Ledger:** All results are stored in an append-only signed JSONL file.
 - **RSA Signing:** SHA-256 with PSS padding for maximum security.
 - **Zero-Trust:** Designed for TEE/Enclave execution.

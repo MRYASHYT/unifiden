@@ -16,7 +16,7 @@ class RubricScore:
 class RubricEngine:
     """
     Implements objective rubric-based scoring to prevent judge hallucination.
-    Follows the structure defined in agentstress_complete_spec.md.
+    Follows the structure defined in unifiden_complete_spec.md.
     """
     
     def __init__(self, rubrics_path: str = "tasks/rubrics.json"):
