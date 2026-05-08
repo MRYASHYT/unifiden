@@ -36,7 +36,7 @@ def run_paper1_experiment():
     print(f"Loaded {len(tasks)} tasks.")
     
     # Repetitions
-    REPS = 1 # Reducing for demonstration; spec wants 10
+    REPS = 10 # Spec requires 10
     
     results = []
     for i, task in enumerate(tasks):

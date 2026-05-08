@@ -118,6 +118,7 @@ def apply_custom_theme():
         </style>
     """, unsafe_allow_html=True)
 
+# --- DATA LOADING ---
 def load_ledger_data():
     ledger_path = "data/evaluation_ledger.jsonl"
     if not os.path.exists(ledger_path): return pd.DataFrame()
@@ -133,6 +134,12 @@ def load_ledger_data():
                 "CERT_HASH": entry["signature"][:12].upper()
             })
     return pd.DataFrame(data)
+
+# Health Check Endpoint (For Deployment)
+if "health" in st.query_params:
+    st.write('{"status": "healthy"}')
+    st.stop()
+
 
 # --- EXECUTION ---
 apply_custom_theme()

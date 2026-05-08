@@ -65,7 +65,7 @@ class PlanExecuteGPTAgent(BaseAgent):
             llm = ChatOpenAI(model=self.model, temperature=self.temperature)
             assess_res = llm.invoke(f"Rate confidence (0-10) for task: {instruction}. Return number only.").content
             try: conf = int(assess_res.strip())
-            except: conf = 9
+            except Exception as e: conf = 9
 
             return AgentResult(
                 agent_id=self.agent_id, architecture="Plan-and-Execute", model=self.model,

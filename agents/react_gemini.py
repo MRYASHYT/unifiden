@@ -63,7 +63,7 @@ class ReActGeminiAgent(BaseAgent):
             llm = ChatGoogleGenerativeAI(model=self.model, temperature=self.temperature)
             assess_res = llm.invoke(f"Rate confidence (0-10) for task: {instruction}. Return number only.").content
             try: conf = int(assess_res.strip())
-            except: conf = 7
+            except Exception as e: conf = 7
 
             return AgentResult(
                 agent_id=self.agent_id,

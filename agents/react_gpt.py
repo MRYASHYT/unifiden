@@ -69,7 +69,7 @@ class ReActGPTAgent(BaseAgent):
                 import re
                 conf_match = re.search(r'"confidence":\s*(\d+)', assessment["output"])
                 confidence = int(conf_match.group(1)) if conf_match else 7
-            except: confidence = 7
+            except Exception as e: confidence = 7
 
             return AgentResult(
                 agent_id=self.agent_id,

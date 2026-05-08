@@ -23,4 +23,4 @@ class PrimaryMetrics:
             model = genai.GenerativeModel('models/gemini-flash-latest')
             prompt = f"Instruction: {instruction}\nOutput: {output}\nRate semantic drift (0-10) where 0=no drift, 10=completely different goal. Return only the number."
             return float(model.generate_content(prompt).text.strip())
-        except: return 0.0
+        except Exception as e: return 0.0

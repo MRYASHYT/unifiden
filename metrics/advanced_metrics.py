@@ -44,7 +44,7 @@ class AdvancedMetrics:
             match = re.search(r"(\d+\.\d+|\d+)", res)
             score = float(match.group(1)) if match else 0.0
             return min(1.0, max(0.0, score if score <= 1.0 else score / 10.0))
-        except: 
+        except Exception as e: 
             return 0.0
 
     def calculate_debate_metrics(self, agent_id: str, r1_res: dict, r3_res: dict) -> dict:

@@ -62,7 +62,7 @@ class ReActClaudeAgent(BaseAgent):
             llm = ChatAnthropic(model=self.model, temperature=self.temperature)
             assess_res = llm.invoke(f"Rate your confidence (0-10) for this task: {instruction}. Return only the number.").content
             try: confidence = int(assess_res.strip())
-            except: confidence = 9
+            except Exception as e: confidence = 9
 
             return AgentResult(
                 agent_id=self.agent_id,

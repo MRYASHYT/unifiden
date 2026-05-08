@@ -78,7 +78,7 @@ class MultiAgentGraphAgent(BaseAgent):
             duration = time.time() - start_time
             assess = self.llm.invoke(f"Rate confidence (0-10) for: {instruction}. Return number only.").content
             try: conf = int(assess.strip())
-            except: conf = 9
+            except Exception as e: conf = 9
 
             return AgentResult(
                 agent_id=self.agent_id, architecture="Multi-Agent Graph", model=self.model,

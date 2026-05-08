@@ -1,9 +1,15 @@
 import json
 import hashlib
+import logging
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives import serialization
 import os
+import shutil
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 class CryptoSigner:
     """
@@ -15,22 +21,25 @@ class CryptoSigner:
         self.key_dir = key_dir
         self.private_key_path = os.path.join(key_dir, "private_key.pem")
         self.public_key_path = os.path.join(key_dir, "public_key.pem")
+        # Define passphrase as bytes. In a real enterprise system, fetch from a secure vault.
+        self.passphrase = b"agentstress_secure_passphrase"
         
         if not os.path.exists(self.key_dir):
             os.makedirs(self.key_dir)
 
     def generate_keys(self):
         """Generates a new RSA key pair for the local environment."""
+        logger.info("Generating new RSA-4096 key pair.")
         private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=4096,
         )
         
-        # Serialize private key
+        # Serialize private key with BestAvailableEncryption
         pem_private = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption()
+            encryption_algorithm=serialization.BestAvailableEncryption(self.passphrase)
         )
         
         # Serialize public key
@@ -45,13 +54,28 @@ class CryptoSigner:
         with open(self.public_key_path, "wb") as f:
             f.write(pem_public)
             
+        logger.info(f"Keys generated and stored in {self.key_dir}")
         return self.public_key_path
+
+    def rotate_keys(self):
+        """Rotates the cryptographic keys by backing up the old ones and generating new ones."""
+        logger.info("Rotating cryptographic keys.")
+        if os.path.exists(self.private_key_path) or os.path.exists(self.public_key_path):
+            backup_dir = os.path.join(self.key_dir, f"backup_{int(os.path.getmtime(self.private_key_path))}")
+            os.makedirs(backup_dir, exist_ok=True)
+            if os.path.exists(self.private_key_path):
+                shutil.copy(self.private_key_path, os.path.join(backup_dir, "private_key.pem"))
+            if os.path.exists(self.public_key_path):
+                shutil.copy(self.public_key_path, os.path.join(backup_dir, "public_key.pem"))
+            logger.info(f"Old keys backed up to {backup_dir}")
+        
+        self.generate_keys()
 
     def load_private_key(self):
         with open(self.private_key_path, "rb") as key_file:
             return serialization.load_pem_private_key(
                 key_file.read(),
-                password=None,
+                password=self.passphrase,
             )
 
     def load_public_key(self):
@@ -89,7 +113,12 @@ class CryptoSigner:
         Verifies the signature against the provided data and the local public key.
         """
         public_key = self.load_public_key()
-        signature = bytes.fromhex(signature_hex)
+        try:
+            signature = bytes.fromhex(signature_hex)
+        except ValueError as e:
+            logger.error(f"Invalid signature format: {e}")
+            return False
+
         data_string = json.dumps(data, sort_keys=True).encode('utf-8')
         
         try:
@@ -103,12 +132,15 @@ class CryptoSigner:
                 hashes.SHA256()
             )
             return True
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Signature verification failed: {e}")
             return False
 
 if __name__ == "__main__":
     # Quick test
     signer = CryptoSigner()
+    # Force generate keys to test BestAvailableEncryption
+    signer.generate_keys()
     test_data = {"test": "data", "result": 100}
     sig = signer.sign_data(test_data)
     print(f"Generated Signature: {sig}")
@@ -119,3 +151,6 @@ if __name__ == "__main__":
     test_data["result"] = 101
     is_valid_tampered = signer.verify_signature(test_data, sig)
     print(f"Is valid after tampering: {is_valid_tampered}")
+    
+    # Test key rotation
+    signer.rotate_keys()

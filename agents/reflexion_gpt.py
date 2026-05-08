@@ -82,7 +82,7 @@ class ReflexionGPTAgent(BaseAgent):
             # Self-assessment
             assess_res = self.llm.invoke(f"Rate your confidence (0-10) for this task: {instruction}. Return only the number.").content
             try: confidence = int(assess_res.strip())
-            except: confidence = 8
+            except Exception as e: confidence = 8
 
             return AgentResult(
                 agent_id=self.agent_id, architecture="Reflexion", model=self.model,

@@ -2,6 +2,17 @@
 
 Industrial-grade AI reliability testing and evaluation framework with cryptographic certification.
 
+## Architecture
+```mermaid
+graph TD
+    A[Instruction] --> B(Round 1: Independent Execution)
+    B --> C(Round 2: Cross-Peer Review)
+    C --> D(Round 3: Revised Answers)
+    D --> E(Round 4: Final Judgment)
+    E --> F[Cryptographic Ledger]
+    F --> G[AUDIT_OS Dashboard]
+```
+
 ## Features
 - **Multi-Agent Debate:** 4-round protocol to detect silent failures and hallucination propagation.
 - **Secure Certification:** Every report is cryptographically signed using 4096-bit RSA.

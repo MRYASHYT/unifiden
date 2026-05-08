@@ -38,7 +38,7 @@ class GeminiJudge(BaseJudge):
                 evidence="N/A", drift_score=0, completeness_score=0,
                 hallucination_detected=False, hallucination_content=None, reasoning=data.get("reasoning", "")
             )
-        except:
+        except Exception as e:
             return FailureClassification(
                 agent_id=rubric_score.agent_id, failure_mode="ERROR", confidence=0,
                 evidence="N/A", drift_score=0, completeness_score=0,
