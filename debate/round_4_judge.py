@@ -3,6 +3,8 @@ import json
 from evaluation.judge_gpt import GPTJudge, FailureClassification
 from evaluation.rubric_engine import RubricEngine
 
+from metrics.advanced_metrics import AdvancedMetrics
+
 class Round4Judge:
     """
     Final Judge evaluates the entire debate history.
@@ -10,6 +12,7 @@ class Round4Judge:
     def __init__(self):
         self.gpt_judge = GPTJudge()
         self.rubric_engine = RubricEngine()
+        self.adv_metrics = AdvancedMetrics()
 
     def run(
         self, 
@@ -24,29 +27,37 @@ class Round4Judge:
         
         judgments = {}
         for agent_id, round3_res in round3_results.items():
-            # For each agent, judge their final Round 3 answer
-            # We also pass the debate history (simplified)
+            r1_res = round1_results[agent_id]
             output = round3_res.get("response", "")
             
-            # Calculate rubric score for Round 3
+            # 1. Semantic Rubric Score
             rubric_score = self.rubric_engine.score_output("debate_task", agent_id, output, rubric)
             
-            # Classify failure
+            # 2. Behavioral Metrics (Stubbornness, Collapse)
+            debate_metrics = self.adv_metrics.calculate_debate_metrics(agent_id, dataclasses.asdict(r1_res), round3_res)
+            
+            # 3. Drift Analysis
+            drift_score = self.adv_metrics.calculate_drift(instruction, output)
+            
+            # 4. Final Failure Classification
             classification = self.gpt_judge.classify_failure(
                 instruction,
                 instruction_type,
                 output,
                 rubric_score,
-                [] # We could pass the full debate history trace here
+                [] # Can pass full trace
             )
             
             judgments[agent_id] = {
                 "rubric_score": rubric_score,
-                "failure_classification": classification
+                "failure_classification": classification,
+                "behavioral_metrics": debate_metrics,
+                "drift_score": drift_score
             }
             
         return {
             "judgments": judgments,
-            "ground_truth_summary": "Summary of debate findings pending full implementation",
-            "overall_reliability_score": 0
+            "overall_reliability_score": sum([j["rubric_score"].percentage for j in judgments.values()]) / len(judgments)
         }
+
+import dataclasses

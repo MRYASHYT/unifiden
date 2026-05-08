@@ -1,6 +1,8 @@
 import json
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+import google.generativeai as genai
+import os
 
 @dataclass
 class RubricScore:
@@ -12,16 +14,20 @@ class RubricScore:
     raw_score: int
     max_score: int
     percentage: float
+    grading_reasoning: str
 
 class RubricEngine:
     """
-    Implements objective rubric-based scoring to prevent judge hallucination.
-    Follows the structure defined in unifiden_complete_spec.md.
+    Upgraded Rubric Engine using LLM-based semantic grading.
+    No longer relies on naive keyword matching.
     """
     
     def __init__(self, rubrics_path: str = "tasks/rubrics.json"):
         self.rubrics_path = rubrics_path
         self.rubrics = self._load_rubrics()
+        # Initialize Gemini for grading
+        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+        self.model = genai.GenerativeModel('models/gemini-flash-latest')
 
     def _load_rubrics(self) -> Dict[str, Any]:
         try:
@@ -37,41 +43,48 @@ class RubricEngine:
         output: str, 
         rubric_data: Optional[Dict[str, Any]] = None
     ) -> RubricScore:
-        """
-        Scores an agent's output against a specific rubric.
-        If rubric_data is provided, it uses that; otherwise, it looks up by task_id.
-        """
         rubric = rubric_data or self.rubrics.get(task_id)
-        
         if not rubric:
             raise ValueError(f"Rubric for task {task_id} not found.")
 
-        required_elements = rubric.get("required_elements", [])
-        forbidden_elements = rubric.get("forbidden_elements", [])
+        req = rubric.get("required_elements", [])
+        forb = rubric.get("forbidden_elements", [])
         
-        present = []
-        missing = []
-        forbidden_found = []
+        prompt = f"""
+        You are a strict technical grader. Evaluate the agent's output based on the rubric.
         
-        # Check required elements (simple keyword/phrase check for MVP)
-        # In a real scenario, this could be enhanced with LLM-based checklist checking
-        for element in required_elements:
-            if element.lower() in output.lower():
-                present.append(element)
-            else:
-                missing.append(element)
-                
-        # Check forbidden elements
-        for element in forbidden_elements:
-            if element.lower() in output.lower():
-                forbidden_found.append(element)
-                
-        # Calculate scores
-        # scoring: { required_present: +1, forbidden_present: -2 }
+        OUTPUT TO GRADE:
+        {output}
+        
+        REQUIRED ELEMENTS: {req}
+        FORBIDDEN ELEMENTS: {forb}
+        
+        Identify which required elements are SEMANTICALLY present and which are missing.
+        Identify if any forbidden elements are present.
+        
+        Return JSON ONLY:
+        {{
+            "present": [list],
+            "missing": [list],
+            "forbidden_found": [list],
+            "reasoning": "string"
+        }}
+        """
+        
+        response = self.model.generate_content(prompt)
+        try:
+            clean_res = response.text.replace("```json", "").replace("```", "").strip()
+            result = json.loads(clean_res)
+        except:
+            # Fallback to naive if LLM fails
+            result = {"present": [], "missing": req, "forbidden_found": [], "reasoning": "LLM Grading Error"}
+
+        present = result.get("present", [])
+        missing = result.get("missing", [])
+        forbidden_found = result.get("forbidden_found", [])
+        
         raw_score = len(present) - (len(forbidden_found) * 2)
-        max_score = len(required_elements)
-        
-        # Ensure raw_score doesn't go below 0 for percentage
+        max_score = len(req)
         percentage = (max(0, raw_score) / max_score * 100) if max_score > 0 else 0.0
         
         return RubricScore(
@@ -82,19 +95,6 @@ class RubricEngine:
             forbidden_elements_found=forbidden_found,
             raw_score=raw_score,
             max_score=max_score,
-            percentage=percentage
+            percentage=percentage,
+            grading_reasoning=result.get("reasoning", "")
         )
-
-if __name__ == "__main__":
-    # Test Rubric Engine
-    engine = RubricEngine()
-    test_rubric = {
-        "required_elements": ["Paper 1", "Paper 2", "Paper 3"],
-        "forbidden_elements": ["Fabricated Result"]
-    }
-    test_output = "I found Paper 1 and Paper 2. No Paper 3. Here is a Fabricated Result."
-    
-    score = engine.score_output("test_task", "agent_1", test_output, test_rubric)
-    print(f"Score: {score.percentage}%")
-    print(f"Missing: {score.required_elements_missing}")
-    print(f"Forbidden Found: {score.forbidden_elements_found}")

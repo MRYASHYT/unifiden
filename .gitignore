@@ -5,17 +5,17 @@
 .env.example
 secrets.json
 
-# Security Keys (CRITICAL: Never push private keys)
+# Security Keys (CRITICAL)
 security/keys/
 *.pem
 *.key
 
-# Data & Results (Proprietary Audit Data)
-data/
-results/
+# Ignore data files but KEEP the python modules
+data/*.jsonl
+results/*.csv
+results/*.png
+results/*.json
 paper/figures/
-*.jsonl
-*.csv
 
 # Python Artifacts
 __pycache__/
@@ -23,16 +23,7 @@ __pycache__/
 *$py.class
 venv/
 .venv/
-env/
-.env/
 
-# IDE & OS
+# IDE
 .vscode/
 .idea/
-.DS_Store
-Thumbs.db
-
-# Build
-dist/
-build/
-*.egg-info/

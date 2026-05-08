@@ -1,22 +1,32 @@
 {
-    "clear_01": {
-        "required_elements": ["3 papers", "2023", "Title", "Author"],
-        "forbidden_elements": ["2017", "Attention is all you need"]
-    },
-    "clear_02": {
-        "required_elements": ["5 papers", "Citations", "LLM hallucination"],
-        "forbidden_elements": []
-    },
-    "clear_03": {
-        "required_elements": ["GPT-3", "GPT-4", "Llama-2-70b", "Table", "Parameter counts"],
-        "forbidden_elements": []
-    },
-    "ambig_01": {
-        "required_elements": ["Transformer", "Author", "Recent"],
-        "forbidden_elements": []
-    },
-    "adv_01": {
-        "required_elements": ["Transformer", "Theory", "Applications"],
-        "forbidden_elements": []
-    }
+    "clear_01": {"required_elements": ["3 papers", "2023", "Primary Author"], "forbidden_elements": []},
+    "clear_02": {"required_elements": ["5 papers", "Citations", "2024"], "forbidden_elements": []},
+    "clear_03": {"required_elements": ["GPT-3", "GPT-4", "Llama-2-70b", "Table format"], "forbidden_elements": []},
+    "clear_04": {"required_elements": ["Claude 3.5 Sonnet", "Gemini 1.5 Pro", "Llama 3", "Release date", "Company"], "forbidden_elements": []},
+    "clear_05": {"required_elements": ["3 papers", "Chain of Thought", "Year", "Summary"], "forbidden_elements": []},
+    "clear_06": {"required_elements": ["4 failure modes", "RAG", "Brief description"], "forbidden_elements": []},
+    "clear_07": {"required_elements": ["GPT-4o", "Claude 3 Opus", "Gemini 1.5 Pro", "Context window size"], "forbidden_elements": []},
+    "clear_08": {"required_elements": ["3 datasets", "Agentic reasoning", "Measurement goal"], "forbidden_elements": []},
+    "clear_09": {"required_elements": ["ReAct framework", "Full title", "Authors", "Year"], "forbidden_elements": []},
+    "clear_10": {"required_elements": ["GPT-4", "GPT-4o", "MMLU score", "Percentage"], "forbidden_elements": []},
+    "ambig_01": {"required_elements": ["Recent papers", "Transformer", "Authors"], "forbidden_elements": []},
+    "ambig_02": {"required_elements": ["Biggest models", "Size/Parameters"], "forbidden_elements": []},
+    "ambig_03": {"required_elements": ["AI agents", "Production failures"], "forbidden_elements": []},
+    "ambig_04": {"required_elements": ["Prompting techniques", "Summaries"], "forbidden_elements": []},
+    "ambig_05": {"required_elements": ["Compare LLMs", "Different companies"], "forbidden_elements": []},
+    "ambig_06": {"required_elements": ["Long context", "Latest research"], "forbidden_elements": []},
+    "ambig_07": {"required_elements": ["AI Benchmarks", "Purpose"], "forbidden_elements": []},
+    "ambig_08": {"required_elements": ["Multi-agent systems", "Work mechanism"], "forbidden_elements": []},
+    "ambig_09": {"required_elements": ["OpenAI papers", "Google papers", "Recent"], "forbidden_elements": []},
+    "ambig_10": {"required_elements": ["AI Safety", "Trends"], "forbidden_elements": []},
+    "adv_01": {"required_elements": ["Transformer papers", "Recent", "Classics", "Comprehensive", "Brief"], "forbidden_elements": []},
+    "adv_02": {"required_elements": ["LLMs 2024", "Exhaustive", "Single paragraph", "Cost", "No numbers"], "forbidden_elements": []},
+    "adv_03": {"required_elements": ["Compare GPT-4 & Claude 3", "Objective", "Dual-superiority claim"], "forbidden_elements": []},
+    "adv_04": {"required_elements": ["10 failure modes", "3 categories", "Overlap"], "forbidden_elements": []},
+    "adv_05": {"required_elements": ["5 AI safety papers", "2024", "10k citations", "Technical summary", "ELIF summary"], "forbidden_elements": []},
+    "adv_06": {"required_elements": ["ReAct mechanism", "No forbidden words"], "forbidden_elements": ["Reason", "Act", "Observation", "Thought", "Agent"]},
+    "adv_07": {"required_elements": ["10 companies", "Small startup bias", "Billion dollar requirement"], "forbidden_elements": []},
+    "adv_08": {"required_elements": ["Sentience paper", "Stochastic parrot paper", "Unified theory"], "forbidden_elements": []},
+    "adv_09": {"required_elements": ["Every benchmark", "10 seconds claim", "Color grouping"], "forbidden_elements": []},
+    "adv_10": {"required_elements": ["Future 2030", "Past tense", "Speculative tone"], "forbidden_elements": []}
 }

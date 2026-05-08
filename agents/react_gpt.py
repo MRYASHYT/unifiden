@@ -63,6 +63,16 @@ class ReActGPTAgent(BaseAgent):
                     duration_ms=0
                 ))
             
+            # Ask the LLM for self-assessment
+            assessment_prompt = f"Based on your performance on this task, rate your confidence from 0-10 and list the steps you completed. Return JSON: {{\"confidence\": int, \"steps\": [list]}}"
+            assessment = self.executor.invoke({"input": assessment_prompt})
+            try:
+                # Basic parsing, could be more robust
+                import re
+                conf_match = re.search(r'"confidence":\s*(\d+)', assessment["output"])
+                confidence = int(conf_match.group(1)) if conf_match else 7
+            except: confidence = 7
+
             return AgentResult(
                 agent_id=self.agent_id,
                 architecture="ReAct",
@@ -75,7 +85,7 @@ class ReActGPTAgent(BaseAgent):
                 duration_seconds=duration,
                 completed=True,
                 run_id=run_id,
-                confidence_self_assessment=8,
+                confidence_self_assessment=confidence,
                 steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
             )
             
