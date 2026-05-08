@@ -5,12 +5,12 @@ import sys
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from evaluation.judge_gpt import GPTJudge
-from evaluation.base_judge import FailureClassification
+from agentstress.evaluation.judge_gpt import GPTJudge
+from agentstress.evaluation.base_judge import FailureClassification
 
 def test_judge_initialization():
     judge = GPTJudge()
-    assert judge.llm.model_name == "gpt-4o"
+    assert judge.model == "gpt-4o"
 
 def test_failure_classification_dataclass():
     fc = FailureClassification(

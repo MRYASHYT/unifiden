@@ -13,7 +13,7 @@
 \maketitle
 
 \begin{abstract}
-Agentic AI pipelines fail silently and systematically in production, yet no standardized framework exists to detect or classify these failures. This paper introduces AgentStress, an industrial-grade reliability testing framework. We conduct 300 controlled experiments across three instruction clarity levels. Our results identify 7 distinct failure modes and demonstrate how multi-agent networks propagate hallucinations.
+Agentic AI pipelines fail silently and systematically in production, yet no standardized framework exists to detect or classify these failures. This paper introduces AgentStress, an industrial-grade reliability testing framework. We propose a methodology for conducting controlled experiments across instruction clarity levels to identify distinct failure modes and investigate hallucination propagation in multi-agent networks.
 \end{abstract}
 
 \section{Introduction}
@@ -23,27 +23,30 @@ As AI agents move into production, the risk of unobservable failures increases..
 We utilize a 4-round multi-agent debate protocol...
 
 \section{Results}
-Our experimental results, based on 1,200 data points across 5 architectures, reveal significant reliability degradation as instruction ambiguity increases.
+\textit{Note: Experimental results are currently pending full-scale execution. The following section outlines the expected analysis based on the AgentStress methodology.}
+
+Our experimental framework is designed to collect data across multiple architectures to reveal reliability degradation as instruction ambiguity increases.
 
 \subsection{Failure Rates}
-Figure \ref{fig:failure_rates} illustrates the mean completion scores across instruction types. Clear instructions consistently outperform adversarial ones by over 40\%.
+Upon completion of the experiments, we will analyze mean completion scores across instruction types. We hypothesize that clear instructions will significantly outperform adversarial ones.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/failure_rates.png}
-    \caption{Mean Completion Score Across Instruction Clarity}
-    \label{fig:failure_rates}
-\end{figure}
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{figures/failure_rates.png}
+%     \caption{Mean Completion Score Across Instruction Clarity}
+%     \label{fig:failure_rates}
+% \end{figure}
 
 \subsection{Failure Distribution}
-The distribution of observed failure modes (Figure \ref{fig:failure_dist}) highlights Instruction Drift and Premature Termination as the primary drivers of agentic unreliability in complex tasks.
+The distribution of observed failure modes will be analyzed to identify primary drivers of agentic unreliability in complex tasks.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.7\textwidth]{figures/failure_distribution.png}
-    \caption{Overall Failure Mode Distribution}
-    \label{fig:failure_dist}
-\end{figure}
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.7\textwidth]{figures/failure_distribution.png}
+%     \caption{Overall Failure Mode Distribution}
+%     \label{fig:failure_dist}
+% \end{figure}
+
 
 \section{Conclusion}
 AgentStress provides a necessary benchmark for agentic reliability...

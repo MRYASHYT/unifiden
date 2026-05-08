@@ -4,9 +4,9 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agents.base_agent import BaseAgent, AgentResult
-from evaluation.base_judge import BaseJudge, RubricScore, FailureClassification, DebateJudgment
-from data.local_ledger import LocalLedger
+from agentstress.agents.base_agent import BaseAgent, AgentResult
+from agentstress.evaluation.base_judge import BaseJudge, RubricScore, FailureClassification, DebateJudgment
+from agentstress.data.local_ledger import LocalLedger
 
 class MockAgent(BaseAgent):
     def __init__(self):

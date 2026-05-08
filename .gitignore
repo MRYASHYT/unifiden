@@ -21,6 +21,8 @@ paper/figures/
 __pycache__/
 *.py[cod]
 *$py.class
+agentstress.log
+tests/test_keys/
 venv/
 .venv/
 

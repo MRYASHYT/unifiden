@@ -5,8 +5,8 @@ import sys
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agents.react_gpt import ReActGPTAgent
-from agents.reflexion_gpt import ReflexionGPTAgent
+from agentstress.agents.react_gpt import ReActGPTAgent
+from agentstress.agents.reflexion_gpt import ReflexionGPTAgent
 
 def test_agent_initialization():
     agent = ReActGPTAgent()

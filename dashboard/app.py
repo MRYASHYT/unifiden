@@ -9,7 +9,8 @@ from datetime import datetime
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from data.local_ledger import LocalLedger
+from agentstress.data.local_ledger import LocalLedger
+from agentstress.config import Config
 
 # --- HIGH-END CYBER AUDIT THEME ---
 st.set_page_config(page_title="AGENTSTRESS // AUDIT_OS", page_icon="📟", layout="wide")
@@ -161,7 +162,8 @@ with st.sidebar:
     if st.button("INITIATE_STRESS_TEST", use_container_width=True):
         with st.spinner("EXECUTING_PROTOCOL..."):
             import subprocess
-            subprocess.run(["python", "experiments/native_pilot.py"])
+            # Use sys.executable for cross-platform reliability
+            subprocess.run([sys.executable, "agentstress/experiments/native_pilot.py"])
             st.rerun()
     
     st.divider()

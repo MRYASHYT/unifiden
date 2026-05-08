@@ -1,13 +1,10 @@
 import argparse
-import sys
 import os
-
-# Add root to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from experiments.pilot_runner import run_pilot
-from experiments.paper2_runner import run_paper2_experiment
-from data.local_ledger import LocalLedger
+import logging
+from agentstress import logger
+from agentstress.experiments.pilot_runner import run_pilot
+from agentstress.experiments.paper2_runner import run_paper2_experiment
+from agentstress.data.local_ledger import LocalLedger
 
 def main():
     parser = argparse.ArgumentParser(description="AgentStress: AI Reliability Testing Framework")
@@ -17,7 +14,7 @@ def main():
     args = parser.parse_args()
     
     if args.mock:
-        print("--- RUNNING IN MOCK MODE ---")
+        logger.info("--- RUNNING IN MOCK MODE ---")
         os.environ["AGENTSTRESS_MOCK"] = "True"
     
     if args.mode == "pilot":
@@ -27,9 +24,9 @@ def main():
     elif args.mode == "verify":
         ledger = LocalLedger()
         if ledger.verify_ledger():
-            print("SUCCESS: All certification records in the ledger are authentic and untampered.")
+            logger.info("SUCCESS: All certification records in the ledger are authentic and untampered.")
         else:
-            print("CRITICAL ERROR: Tampering detected in the evaluation ledger!")
+            logger.error("CRITICAL ERROR: Tampering detected in the evaluation ledger!")
 
 if __name__ == "__main__":
     main()

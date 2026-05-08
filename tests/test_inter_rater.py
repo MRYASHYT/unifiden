@@ -1,5 +1,5 @@
 import pytest
-from evaluation.inter_rater import InterRater
+from agentstress.evaluation.inter_rater import InterRater
 
 def test_perfect_agreement():
     j1 = ["NO_FAILURE", "INSTRUCTION_DRIFT"]

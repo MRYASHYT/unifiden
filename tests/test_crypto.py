@@ -1,7 +1,7 @@
 import pytest
 import os
 import shutil
-from security.crypto_signer import CryptoSigner
+from agentstress.security.crypto_signer import CryptoSigner
 
 @pytest.fixture
 def signer():

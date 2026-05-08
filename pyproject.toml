@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentstress"
+version = "1.0.0"
+description = "An industrial-grade reliability testing framework for agentic AI pipelines."
+authors = [
+    {name = "Yash Gupta", email = "research.yashgupta@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langchain>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langchain-anthropic>=0.2.0",
+    "langchain-community>=0.3.0",
+    "openai>=1.50.0",
+    "anthropic>=0.34.1",
+    "python-dotenv>=1.0.1",
+    "pandas>=2.2.0",
+    "numpy>=1.26.4",
+    "scipy>=1.13.0",
+    "matplotlib>=3.8.3",
+    "seaborn>=0.13.2",
+    "cryptography>=42.0.5",
+    "duckduckgo-search>=5.3.0",
+    "langgraph>=0.2.0",
+    "langchain-google-genai>=2.0.0",
+    "langchain-experimental>=0.3.2",
+    "google-genai>=0.1.0",
+    "streamlit>=1.32.0",
+    "plotly>=5.19.0",
+    "langchainhub>=0.1.21"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "black>=24.0.0",
+    "flake8>=7.0.0",
+    "isort>=5.13.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agentstress*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+line_length = 100

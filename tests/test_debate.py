@@ -1,9 +1,9 @@
 import pytest
-from debate.debate_coordinator import DebateCoordinator
-from debate.round_1_runner import Round1Runner
-from debate.round_2_reviewer import Round2Reviewer
-from debate.round_3_reviser import Round3Reviser
-from agents.base_agent import BaseAgent, AgentResult, ToolCall
+from agentstress.debate.debate_coordinator import DebateCoordinator
+from agentstress.debate.round_1_runner import Round1Runner
+from agentstress.debate.round_2_reviewer import Round2Reviewer
+from agentstress.debate.round_3_reviser import Round3Reviser
+from agentstress.agents.base_agent import BaseAgent, AgentResult, ToolCall
 
 class MockAgent(BaseAgent):
     def __init__(self, aid):

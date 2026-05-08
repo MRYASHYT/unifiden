@@ -5,8 +5,8 @@ import sys
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from security.crypto_signer import CryptoSigner
-from evaluation.rubric_engine import RubricEngine
+from agentstress.security.crypto_signer import CryptoSigner
+from agentstress.evaluation.rubric_engine import RubricEngine
 
 def test_crypto_signing():
     """Verifies that cryptographic signing and verification works."""

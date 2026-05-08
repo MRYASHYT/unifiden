@@ -1,11 +1,11 @@
-.PHONY: test lint run-pilot run-dashboard clean
+.PHONY: test lint run-pilot run-experiment run-dashboard clean
 
 test:
-	pytest tests/
+	python -m pytest tests/
 
 lint:
-	flake8 agents/ evaluation/ metrics/
-	black agents/ evaluation/ metrics/
+	flake8 agentstress/
+	black agentstress/
 
 run-pilot:
 	python main.py --mode pilot
@@ -17,5 +17,5 @@ run-dashboard:
 	streamlit run dashboard/app.py
 
 clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} +
-	rm -rf .pytest_cache
+	python -c "import os, shutil; [shutil.rmtree(os.path.join(root, d)) for root, dirs, files in os.walk('.') for d in dirs if d == '__pycache__']"
+	python -c "import os, shutil; shutil.rmtree('.pytest_cache', ignore_errors=True)"
