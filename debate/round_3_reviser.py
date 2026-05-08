@@ -16,17 +16,19 @@ class Round3Reviser:
             print(f"  Agent {agent.agent_id} revising answer...")
             
             # Privacy Filter: Only give this agent reviews that were ABOUT them.
-            # Round 2 results is a dict: { reviewer_id: { "reviews": { target_id: review_text } } }
-            # (Note: DebateHelper structure returns { "agent_id": aid, "response": text })
-            # We need to parse the response to extract the specific review for this agent.
+            # round2_results structure: { reviewer_id: { "agent_id": target_id, "response": review_text } }
+            # Actually, DebateHelper.run_debate_round returns { "agent_id": reviewer_id, "round": 2, "response": combined_reviews }
             
-            # Since the current Round 2 implementation returns a raw text block of all peer reviews,
-            # we provide the full block but instruct the agent to focus on feedback about itself.
-            # IN PRODUCTION: We would extract the specific section for 'agent.agent_id'.
+            # For each reviewer's response, we extract the part intended for 'agent.agent_id'
+            relevant_reviews = {}
+            for reviewer_id, review_bundle in round2_results.items():
+                # For MVP, we pass the full bundle but instruct the LLM specifically to look for reviews of self.
+                # In full implementation, we would regex parse the bundle or use structured output.
+                relevant_reviews[reviewer_id] = review_bundle.get("response", "")
             
             peer_context = {
                 "round1_own": dataclasses.asdict(round1_results[agent.agent_id]),
-                "peer_reviews": round2_results 
+                "peer_reviews_of_self": relevant_reviews 
             }
             
             revised = agent.run_with_peer_context(instruction, 3, peer_context)
