@@ -42,8 +42,8 @@ class OllamaAgent(BaseAgent):
         }
         
         try:
-            # Increased timeout for local heavy-lifting
-            response = requests.post(self.base_url, json=payload, timeout=300)
+            # Increased timeout for local heavy-lifting (10 minutes)
+            response = requests.post(self.base_url, json=payload, timeout=600)
             
             if response.status_code != 200:
                 error_detail = response.text
