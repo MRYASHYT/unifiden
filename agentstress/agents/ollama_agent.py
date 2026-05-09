@@ -2,6 +2,7 @@ import os
 import time
 import uuid
 import requests
+import json
 from typing import List, Dict, Any, Optional
 from agentstress.agents.base_agent import BaseAgent, AgentResult, ToolCall
 from agentstress.config import Config
@@ -14,44 +15,49 @@ class OllamaAgent(BaseAgent):
     """
     
     def __init__(self, agent_id: str = "local_ollama_agent", model: str = None, temperature: float = 0.1):
-        # Use default model from config if not specified
         model = model or Config.DEFAULT_LOCAL_MODEL
         super().__init__(agent_id, model, temperature)
+        # Use generate endpoint
         self.base_url = f"{Config.OLLAMA_BASE_URL}/api/generate"
 
     def setup(self) -> None:
-        """Verify Ollama is reachable."""
+        """Verify Ollama is reachable and model is available."""
         try:
-            res = requests.get(Config.OLLAMA_BASE_URL, timeout=2)
+            res = requests.get(Config.OLLAMA_BASE_URL, timeout=5)
             if res.status_code == 200:
-                logger.info(f"Ollama reachable at {Config.OLLAMA_BASE_URL}")
+                logger.info(f"Ollama server is active at {Config.OLLAMA_BASE_URL}")
         except Exception:
-            logger.warning(f"Ollama NOT reachable at {Config.OLLAMA_BASE_URL}. Experiments will fail.")
+            logger.warning(f"Ollama server NOT found at {Config.OLLAMA_BASE_URL}.")
 
     def run(self, instruction: str, instruction_type: str) -> AgentResult:
-        """Executes task locally via Ollama."""
+        """Executes task locally via Ollama with robust error handling."""
         start_time = time.time()
         run_id = str(uuid.uuid4())
         
+        # Simplified payload to maximize compatibility
         payload = {
             "model": self.model,
             "prompt": instruction,
-            "stream": False,
-            "options": {
-                "temperature": self.temperature
-            }
+            "stream": False
         }
         
         try:
-            response = requests.post(self.base_url, json=payload, timeout=120)
-            response.raise_for_status()
+            # Increased timeout for local heavy-lifting
+            response = requests.post(self.base_url, json=payload, timeout=300)
+            
+            if response.status_code != 200:
+                error_detail = response.text
+                try:
+                    error_json = response.json()
+                    error_detail = error_json.get("error", error_detail)
+                except: pass
+                raise Exception(f"Ollama Error ({response.status_code}): {error_detail}")
+                
             data = response.json()
             output = data.get("response", "")
             
             duration = time.time() - start_time
             
-            # Simple Ollama agents don't use tools in this basic wrapper, 
-            # but we record the 'thought' step.
             return AgentResult(
                 agent_id=self.agent_id,
                 architecture="Local-Ollama",
@@ -69,6 +75,7 @@ class OllamaAgent(BaseAgent):
             )
             
         except Exception as e:
+            logger.error(f"Ollama Execution Failed: {str(e)}")
             return AgentResult(
                 agent_id=self.agent_id,
                 architecture="Local-Ollama",
@@ -84,11 +91,11 @@ class OllamaAgent(BaseAgent):
 
     def run_with_peer_context(self, instruction: str, round_number: int, peer_data: Dict[str, Any]) -> Dict[str, Any]:
         """Debate round running locally."""
-        prompt = f"System: You are in a multi-agent debate. Task: {instruction}\nRound: {round_number}\nPeer Data: {peer_data}\nProvide your refined answer."
+        prompt = f"System: Multi-agent debate.\nTask: {instruction}\nRound: {round_number}\nPeers: {json.dumps(peer_data)}\nRefined Answer:"
         
         payload = {"model": self.model, "prompt": prompt, "stream": False}
         try:
-            res = requests.post(self.base_url, json=payload)
+            res = requests.post(self.base_url, json=payload, timeout=300)
             return {"agent_id": self.agent_id, "response": res.json().get("response", "")}
-        except:
-            return {"agent_id": self.agent_id, "response": "Error in local generation."}
+        except Exception as e:
+            return {"agent_id": self.agent_id, "response": f"Error: {str(e)}"}

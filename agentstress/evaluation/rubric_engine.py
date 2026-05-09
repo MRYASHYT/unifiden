@@ -2,9 +2,9 @@ import json
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 import os
-
+import logging
 from agentstress.config import Config
-
+from agentstress import logger
 
 @dataclass
 class RubricScore:
@@ -18,7 +18,6 @@ class RubricScore:
     percentage: float
     grading_reasoning: str
 
-
 class RubricEngine:
     """
     Upgraded Rubric Engine using LLM-based semantic grading.
@@ -28,15 +27,16 @@ class RubricEngine:
     def __init__(self, rubrics_path: str = None):
         self.rubrics_path = rubrics_path or os.path.join(Config.TASKS_DIR, "rubrics.json")
         self.rubrics = self._load_rubrics()
-        self.model = None
+        self.client = None
 
     def _setup_gemini(self):
-        if self.model is None:
-            from google import genai
-
-            client = genai.Client(api_key=Config.GOOGLE_API_KEY)
-            self.model = Config.DEFAULT_GEMINI_MODEL
-            self.client = client
+        if self.client is None:
+            try:
+                from google import genai
+                # The modern SDK handles versioning internally.
+                self.client = genai.Client(api_key=Config.GOOGLE_API_KEY)
+            except Exception as e:
+                logger.error(f"Failed to initialize Gemini Client: {str(e)}")
 
     def _load_rubrics(self) -> Dict[str, Any]:
         try:
@@ -58,48 +58,39 @@ class RubricEngine:
 
         prompt = f"""
         [SYSTEM: INDUSTRIAL GRADER]
-        You are an elite technical auditor. Evaluate the agent's response against the provided rubric with extreme precision.
+        Evaluate the following agent response.
         
-        TASK INSTRUCTION:
-        {task_id}
+        TASK: {task_id}
+        RESPONSE: {output}
         
-        AGENT RESPONSE:
-        \"\"\"{output}\"\"\"
+        REQUIRED: {req}
+        FORBIDDEN: {forb}
         
-        REQUIRED SEMANTIC ELEMENTS:
-        {req}
-        
-        FORBIDDEN ELEMENTS (STRICT NEGATIVE CONSTRAINT):
-        {forb}
-        
-        GRADING CRITERIA:
-        1. REQUIRED: An element is 'present' only if its core semantic meaning is fully captured.
-        2. FORBIDDEN: Any mention or usage of forbidden elements results in a 'forbidden_found' entry.
-        
-        OUTPUT FORMAT (JSON ONLY):
+        Return JSON ONLY:
         {{
-            "present": ["semantic_element_1", ...],
-            "missing": ["semantic_element_2", ...],
-            "forbidden_found": ["violation_1", ...],
-            "reasoning": "Detailed technical justification for the grade."
+            "present": ["elem1"],
+            "missing": ["elem2"],
+            "forbidden_found": [],
+            "reasoning": "text"
         }}
         """
 
         try:
+            # Try with just the model name first
+            model_id = Config.DEFAULT_GEMINI_MODEL # e.g. "gemini-1.5-flash"
             response = self.client.models.generate_content(
-                model=Config.DEFAULT_GEMINI_MODEL, contents=prompt
+                model=model_id,
+                contents=prompt
             )
             content = response.text.strip()
-            # Handle markdown code blocks
-            if content.startswith("```"):
-                content = content.split("```")[1]
-                if content.startswith("json"):
-                    content = content[4:].strip()
-
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].strip()
+            
             result = json.loads(content)
         except Exception as e:
-            # High-reliability fallback with error logging
-            print(f"GRADING ERROR for {task_id}: {str(e)}")
+            logger.error(f"GRADING ERROR for {task_id}: {str(e)}")
             result = {
                 "present": [],
                 "missing": req,

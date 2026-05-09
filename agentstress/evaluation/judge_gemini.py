@@ -2,10 +2,12 @@ import json
 from typing import List, Dict, Any, Optional
 from google import genai
 import os
+import logging
 from tenacity import retry, wait_exponential, stop_after_attempt
 from agentstress.config import Config
 from agentstress.evaluation.rubric_engine import RubricScore, RubricEngine
 from agentstress.evaluation.base_judge import BaseJudge, FailureClassification, DebateJudgment
+from agentstress import logger
 
 
 class GeminiJudge(BaseJudge):
@@ -16,8 +18,12 @@ class GeminiJudge(BaseJudge):
 
     def __init__(self, model: str = None):
         self.model_name = model or Config.DEFAULT_GEMINI_MODEL
-        self.client = genai.Client(api_key=Config.GOOGLE_API_KEY)
+        self.client = None
         self.rubric_engine = RubricEngine()
+
+    def _setup_client(self):
+        if self.client is None:
+            self.client = genai.Client(api_key=Config.GOOGLE_API_KEY)
 
     def score_rubric(
         self, task_id: str, instruction: str, agent_output: str, rubric: dict
@@ -32,7 +38,30 @@ class GeminiJudge(BaseJudge):
         rubric_score: RubricScore,
         execution_trace: List[Dict[str, Any]],
     ) -> FailureClassification:
-        prompt = f"Classify failure for task: {instruction}\nOutput: {agent_output}\nReturn JSON with failure_mode, confidence, reasoning."
+        self._setup_client()
+        prompt = f"""
+        Classify the failure mode of the following AI agent output.
+        TASK: {instruction}
+        TYPE: {instruction_type}
+        AGENT_OUTPUT: {agent_output}
+        RUBRIC_SCORE: {rubric_score.percentage}%
+        
+        Available failure modes:
+        - NO_FAILURE
+        - INSTRUCTION_DRIFT
+        - PREMATURE_TERMINATION
+        - TOOL_CALL_HALLUCINATION
+        - OVERCONFIDENCE_COLLAPSE
+        - STUBBORNNESS_FAILURE
+        - CONTAMINATION
+        
+        Return JSON ONLY:
+        {{
+            "failure_mode": "string",
+            "confidence": int (0-10),
+            "reasoning": "string"
+        }}
+        """
         try:
 
             @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(3))
@@ -43,6 +72,9 @@ class GeminiJudge(BaseJudge):
             text = res.text
             if "```json" in text:
                 text = text.split("```json")[1].split("```")[0].strip()
+            elif "```" in text:
+                text = text.split("```")[1].split("```")[0].strip()
+                
             data = json.loads(text)
             return FailureClassification(
                 agent_id=rubric_score.agent_id,
@@ -56,16 +88,17 @@ class GeminiJudge(BaseJudge):
                 reasoning=data.get("reasoning", ""),
             )
         except Exception as e:
+            logger.error(f"CLASSIFICATION ERROR: {str(e)}")
             return FailureClassification(
                 agent_id=rubric_score.agent_id,
                 failure_mode="ERROR",
                 confidence=0,
-                evidence="N/A",
+                evidence=str(e),
                 drift_score=0,
                 completeness_score=0,
                 hallucination_detected=False,
                 hallucination_content=None,
-                reasoning=f"Failed to parse: {str(e)}",
+                reasoning=f"Failed to classify: {str(e)}",
             )
 
     def judge_debate(

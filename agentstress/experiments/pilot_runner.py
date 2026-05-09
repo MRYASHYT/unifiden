@@ -42,12 +42,15 @@ def run_pilot(use_local: bool = False):
     # 1. Initialize Components
     if use_local:
         from agentstress.agents.ollama_agent import OllamaAgent
+        from agentstress.evaluation.judge_gemini import GeminiJudge
         agent = OllamaAgent()
+        judge = GeminiJudge()
     else:
         agent = ReActGPTAgent()
+        judge = GPTJudge()
 
-    judge = GPTJudge()
     ledger = LocalLedger()
+
     # 2. Setup Task
     task_id = "clear_01"
     instruction = "Find the current stock price of NVIDIA and calculate the market cap if there are 2.46 billion shares outstanding."

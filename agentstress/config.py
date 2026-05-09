@@ -20,7 +20,7 @@ class Config:
     # Model Settings
     DEFAULT_GPT_MODEL = "gpt-4o"
     DEFAULT_CLAUDE_MODEL = "claude-sonnet-4-20250514"
-    DEFAULT_GEMINI_MODEL = "models/gemini-1.5-flash"
+    DEFAULT_GEMINI_MODEL = "gemini-1.5-flash"
     
     # Local AI (Ollama) - The $0 Cost Engine
     OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
