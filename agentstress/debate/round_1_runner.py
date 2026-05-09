@@ -2,10 +2,12 @@ from typing import List, Dict, Any
 import dataclasses
 from agentstress.agents.base_agent import BaseAgent, AgentResult
 
+
 class Round1Runner:
     """
     Executes all agents independently on the same instruction.
     """
+
     def __init__(self, agents: List[BaseAgent]):
         self.agents = agents
 

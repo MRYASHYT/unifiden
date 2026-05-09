@@ -9,17 +9,21 @@ from langchain_community.tools import DuckDuckGoSearchRun
 from langchainhub import Client
 from langchain_core.prompts import ChatPromptTemplate
 import json
+from tenacity import retry, wait_exponential, stop_after_attempt
 from agentstress.agents.base_agent import BaseAgent, AgentResult, ToolCall
 
 load_dotenv()
+
 
 class ReActGPTAgent(BaseAgent):
     """
     Agent 1: ReAct + GPT-4o
     Baseline production architecture for the AgentStress framework.
     """
-    
-    def __init__(self, agent_id: str = "agent_1_react_gpt4o", model: str = "gpt-4o", temperature: float = 0.1):
+
+    def __init__(
+        self, agent_id: str = "agent_1_react_gpt4o", model: str = "gpt-4o", temperature: float = 0.1
+    ):
         super().__init__(agent_id, model, temperature)
         self.executor = None
         self.tools = [DuckDuckGoSearchRun()]
@@ -31,46 +35,60 @@ class ReActGPTAgent(BaseAgent):
         prompt = client.pull("hwchase17/react")
         agent = create_react_agent(llm, self.tools, prompt)
         self.executor = AgentExecutor(
-            agent=agent, 
-            tools=self.tools, 
-            verbose=True, 
+            agent=agent,
+            tools=self.tools,
+            verbose=True,
             handle_parsing_errors=True,
             max_iterations=15,
-            return_intermediate_steps=True
+            return_intermediate_steps=True,
         )
 
     def run(self, instruction: str, instruction_type: str) -> AgentResult:
         """Executes the task and captures detailed execution traces."""
         if not self.executor:
             self.setup()
-            
+
         start_time = time.time()
         run_id = str(uuid.uuid4())
-        
+
         try:
-            response = self.executor.invoke({"input": instruction})
+
+            @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(3))
+            def invoke_agent():
+                return self.executor.invoke({"input": instruction})
+
+            response = invoke_agent()
             duration = time.time() - start_time
-            
+
             # Parse intermediate steps into ToolCall objects
             tool_calls = []
             for i, (action, observation) in enumerate(response.get("intermediate_steps", [])):
-                tool_calls.append(ToolCall(
-                    step=i + 1,
-                    tool_name=action.tool,
-                    tool_input=str(action.tool_input),
-                    tool_output=str(observation),
-                    timestamp=time.time(),
-                    duration_ms=0
-                ))
-            
+                tool_calls.append(
+                    ToolCall(
+                        step=i + 1,
+                        tool_name=action.tool,
+                        tool_input=str(action.tool_input),
+                        tool_output=str(observation),
+                        timestamp=time.time(),
+                        duration_ms=0,
+                    )
+                )
+
             # Ask the LLM for self-assessment
-            assessment_prompt = f"Based on your performance on this task, rate your confidence from 0-10 and list the steps you completed. Return JSON: {{\"confidence\": int, \"steps\": [list]}}"
-            assessment = self.executor.invoke({"input": assessment_prompt})
+            assessment_prompt = f'Based on your performance on this task, rate your confidence from 0-10 and list the steps you completed. Return JSON: {{"confidence": int, "steps": [list]}}'
+
+            @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(3))
+            def invoke_assessment():
+                return self.executor.invoke({"input": assessment_prompt})
+
+            assessment = invoke_assessment()
             try:
                 import re
+
                 conf_match = re.search(r'"confidence":\s*(\d+)', assessment["output"])
                 confidence = int(conf_match.group(1)) if conf_match else 7
-            except Exception as e: confidence = 7
+            except Exception as e:
+                confidence = 7
 
             return AgentResult(
                 agent_id=self.agent_id,
@@ -85,9 +103,9 @@ class ReActGPTAgent(BaseAgent):
                 completed=True,
                 run_id=run_id,
                 confidence_self_assessment=confidence,
-                steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
+                steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)],
             )
-            
+
         except Exception as e:
             duration = time.time() - start_time
             return AgentResult(
@@ -100,18 +118,19 @@ class ReActGPTAgent(BaseAgent):
                 completed=False,
                 error=str(e),
                 duration_seconds=duration,
-                run_id=run_id
+                run_id=run_id,
             )
 
     def run_with_peer_context(
-        self, 
-        instruction: str,
-        round_number: int,
-        peer_data: Dict[str, Any]
+        self, instruction: str, round_number: int, peer_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         from agentstress.debate.debate_helper import DebateHelper
+
         llm = ChatOpenAI(model=self.model, temperature=self.temperature)
-        return DebateHelper.run_debate_round(llm, self.agent_id, instruction, round_number, peer_data)
+        return DebateHelper.run_debate_round(
+            llm, self.agent_id, instruction, round_number, peer_data
+        )
+
 
 if __name__ == "__main__":
     agent = ReActGPTAgent()

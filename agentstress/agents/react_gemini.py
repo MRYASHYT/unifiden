@@ -7,17 +7,24 @@ from langchain.agents import AgentExecutor, create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchainhub import Client
+from tenacity import retry, wait_exponential, stop_after_attempt
 from agentstress.agents.base_agent import BaseAgent, AgentResult, ToolCall
 
 load_dotenv()
+
 
 class ReActGeminiAgent(BaseAgent):
     """
     Agent: ReAct + Gemini 1.5 Flash
     Cost-effective alternative for testing the AgentStress framework.
     """
-    
-    def __init__(self, agent_id: str = "agent_gemini_react", model: str = "gemini-1.5-flash", temperature: float = 0.1):
+
+    def __init__(
+        self,
+        agent_id: str = "agent_gemini_react",
+        model: str = "gemini-1.5-flash",
+        temperature: float = 0.1,
+    ):
         super().__init__(agent_id, model, temperature)
         self.executor = None
         self.tools = [DuckDuckGoSearchRun()]
@@ -29,42 +36,58 @@ class ReActGeminiAgent(BaseAgent):
         prompt = client.pull("hwchase17/react")
         agent = create_react_agent(llm, self.tools, prompt)
         self.executor = AgentExecutor(
-            agent=agent, 
-            tools=self.tools, 
-            verbose=True, 
+            agent=agent,
+            tools=self.tools,
+            verbose=True,
             handle_parsing_errors=True,
             max_iterations=15,
-            return_intermediate_steps=True
+            return_intermediate_steps=True,
         )
 
     def run(self, instruction: str, instruction_type: str) -> AgentResult:
         """Executes the task using Gemini and captures traces."""
         if not self.executor:
             self.setup()
-            
+
         start_time = time.time()
         run_id = str(uuid.uuid4())
-        
+
         try:
-            response = self.executor.invoke({"input": instruction})
+
+            @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(3))
+            def invoke_agent():
+                return self.executor.invoke({"input": instruction})
+
+            response = invoke_agent()
             duration = time.time() - start_time
-            
+
             tool_calls = []
             for i, (action, observation) in enumerate(response.get("intermediate_steps", [])):
-                tool_calls.append(ToolCall(
-                    step=i + 1,
-                    tool_name=action.tool,
-                    tool_input=str(action.tool_input),
-                    tool_output=str(observation),
-                    timestamp=time.time(),
-                    duration_ms=0
-                ))
-            
+                tool_calls.append(
+                    ToolCall(
+                        step=i + 1,
+                        tool_name=action.tool,
+                        tool_input=str(action.tool_input),
+                        tool_output=str(observation),
+                        timestamp=time.time(),
+                        duration_ms=0,
+                    )
+                )
+
             # Confidence assessment
             llm = ChatGoogleGenerativeAI(model=self.model, temperature=self.temperature)
-            assess_res = llm.invoke(f"Rate confidence (0-10) for task: {instruction}. Return number only.").content
-            try: conf = int(assess_res.strip())
-            except Exception as e: conf = 7
+
+            @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(3))
+            def invoke_assessment():
+                return llm.invoke(
+                    f"Rate confidence (0-10) for task: {instruction}. Return number only."
+                ).content
+
+            assess_res = invoke_assessment()
+            try:
+                conf = int(assess_res.strip())
+            except Exception as e:
+                conf = 7
 
             return AgentResult(
                 agent_id=self.agent_id,
@@ -79,9 +102,9 @@ class ReActGeminiAgent(BaseAgent):
                 completed=True,
                 run_id=run_id,
                 confidence_self_assessment=conf,
-                steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)]
+                steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)],
             )
-            
+
         except Exception as e:
             duration = time.time() - start_time
             return AgentResult(
@@ -94,13 +117,19 @@ class ReActGeminiAgent(BaseAgent):
                 completed=False,
                 error=str(e),
                 duration_seconds=duration,
-                run_id=run_id
+                run_id=run_id,
             )
 
-    def run_with_peer_context(self, instruction: str, round_number: int, peer_data: Dict[str, Any]) -> Dict[str, Any]:
+    def run_with_peer_context(
+        self, instruction: str, round_number: int, peer_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         from agentstress.debate.debate_helper import DebateHelper
+
         llm = ChatGoogleGenerativeAI(model=self.model, temperature=self.temperature)
-        return DebateHelper.run_debate_round(llm, self.agent_id, instruction, round_number, peer_data)
+        return DebateHelper.run_debate_round(
+            llm, self.agent_id, instruction, round_number, peer_data
+        )
+
 
 if __name__ == "__main__":
     agent = ReActGeminiAgent()

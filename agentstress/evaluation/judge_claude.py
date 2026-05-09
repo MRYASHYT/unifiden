@@ -5,11 +5,12 @@ from langchain.prompts import ChatPromptTemplate
 from agentstress.evaluation.rubric_engine import RubricScore, RubricEngine
 from agentstress.evaluation.base_judge import BaseJudge, FailureClassification, DebateJudgment
 
+
 class ClaudeJudge(BaseJudge):
     """
     Secondary judge using Claude for inter-rater reliability.
     """
-    
+
     def __init__(self, model: str = "claude-3-5-sonnet-latest"):
         self.llm = ChatAnthropic(model=model, temperature=0)
         self.rubric_engine = RubricEngine()
@@ -21,10 +22,12 @@ class ClaudeJudge(BaseJudge):
             "OVERCONFIDENCE_COLLAPSE": "Abandoned a correct answer due to peer pressure.",
             "STUBBORN_FAILURE": "Did not update wrong beliefs despite peer correction.",
             "CONTAMINATION": "Adopted a peer's hallucination as fact.",
-            "PARTIAL_FAILURE": "Acknowledged incompleteness but did not attempt recovery."
+            "PARTIAL_FAILURE": "Acknowledged incompleteness but did not attempt recovery.",
         }
 
-    def score_rubric(self, task_id: str, instruction: str, agent_output: str, rubric: dict) -> RubricScore:
+    def score_rubric(
+        self, task_id: str, instruction: str, agent_output: str, rubric: dict
+    ) -> RubricScore:
         return self.rubric_engine.score_output(task_id, "CLAUDE_JUDGE", agent_output, rubric)
 
     def classify_failure(
@@ -33,7 +36,7 @@ class ClaudeJudge(BaseJudge):
         instruction_type: str,
         agent_output: str,
         rubric_score: RubricScore,
-        execution_trace: List[Dict[str, Any]]
+        execution_trace: List[Dict[str, Any]],
     ) -> FailureClassification:
         prompt = ChatPromptTemplate.from_template("""
         You are the AgentStress Judge (Claude Edition). Your task is to classify an agent's failure based on a strict taxonomy.
@@ -60,24 +63,26 @@ class ClaudeJudge(BaseJudge):
         - hallucination_content: (Optional)
         - reasoning: (Detailed explanation)
         """)
-        
+
         chain = prompt | self.llm
-        
-        response = chain.invoke({
-            "taxonomy": json.dumps(self.taxonomy, indent=2),
-            "instruction": instruction,
-            "instruction_type": instruction_type,
-            "agent_output": agent_output,
-            "rubric_score_percent": rubric_score.percentage
-        })
-        
+
+        response = chain.invoke(
+            {
+                "taxonomy": json.dumps(self.taxonomy, indent=2),
+                "instruction": instruction,
+                "instruction_type": instruction_type,
+                "agent_output": agent_output,
+                "rubric_score_percent": rubric_score.percentage,
+            }
+        )
+
         try:
             content = response.content
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()
             elif "```" in content:
                 content = content.split("```")[1].split("```")[0].strip()
-            
+
             data = json.loads(content)
             return FailureClassification(
                 agent_id=rubric_score.agent_id,
@@ -88,7 +93,7 @@ class ClaudeJudge(BaseJudge):
                 completeness_score=data.get("completeness_score", 0),
                 hallucination_detected=data.get("hallucination_detected", False),
                 hallucination_content=data.get("hallucination_content"),
-                reasoning=data.get("reasoning", "")
+                reasoning=data.get("reasoning", ""),
             )
         except Exception as e:
             return FailureClassification(
@@ -100,13 +105,21 @@ class ClaudeJudge(BaseJudge):
                 completeness_score=0,
                 hallucination_detected=False,
                 hallucination_content=None,
-                reasoning=f"Claude Judge Parse Error: {str(e)}"
+                reasoning=f"Claude Judge Parse Error: {str(e)}",
             )
 
-    def judge_debate(self, task: str, round_1_answers: dict, round_2_reviews: dict, round_3_answers: dict) -> DebateJudgment:
+    def judge_debate(
+        self, task: str, round_1_answers: dict, round_2_reviews: dict, round_3_answers: dict
+    ) -> DebateJudgment:
         return DebateJudgment(
-            task=task, instruction_type="N/A", ground_truth="Final Ground Truth calculated by Round4Judge",
-            agent_scores={}, hallucination_propagation={}, reliability_ranking=[],
-            production_recommendation="N/A", framework_insights=[],
-            overall_reliability_score=0, experiment_metadata={}
+            task=task,
+            instruction_type="N/A",
+            ground_truth="Final Ground Truth calculated by Round4Judge",
+            agent_scores={},
+            hallucination_propagation={},
+            reliability_ranking=[],
+            production_recommendation="N/A",
+            framework_insights=[],
+            overall_reliability_score=0,
+            experiment_metadata={},
         )

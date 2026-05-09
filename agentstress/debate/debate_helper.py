@@ -3,9 +3,12 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from typing import Dict, Any
 
+
 class DebateHelper:
     @staticmethod
-    def run_debate_round(llm, agent_id: str, instruction: str, round_number: int, peer_data: Dict[str, Any]) -> Dict[str, Any]:
+    def run_debate_round(
+        llm, agent_id: str, instruction: str, round_number: int, peer_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         if round_number == 2:
             prompt = ChatPromptTemplate.from_template("""
             Task: {instruction}
@@ -18,9 +21,11 @@ class DebateHelper:
             3. Completeness score (0-10).
             4. Accuracy score (0-10).
             """)
-            response = llm.invoke(prompt.format(instruction=instruction, peer_data=json.dumps(peer_data)))
+            response = llm.invoke(
+                prompt.format(instruction=instruction, peer_data=json.dumps(peer_data))
+            )
             return {"agent_id": agent_id, "round": 2, "response": response.content}
-            
+
         elif round_number == 3:
             prompt = ChatPromptTemplate.from_template("""
             Task: {instruction}
@@ -30,11 +35,13 @@ class DebateHelper:
             Based on the reviews, provide your final, best, and most accurate answer.
             Only change your original answer if you are convinced the peer feedback is correct.
             """)
-            response = llm.invoke(prompt.format(
-                instruction=instruction, 
-                round1_own=json.dumps(peer_data.get("round1_own")), 
-                peer_reviews=json.dumps(peer_data.get("peer_reviews"))
-            ))
+            response = llm.invoke(
+                prompt.format(
+                    instruction=instruction,
+                    round1_own=json.dumps(peer_data.get("round1_own")),
+                    peer_reviews=json.dumps(peer_data.get("peer_reviews")),
+                )
+            )
             return {"agent_id": agent_id, "round": 3, "response": response.content}
-        
+
         return {"agent_id": agent_id, "round": round_number, "response": "Invalid round"}
