@@ -2,9 +2,6 @@ import argparse
 import os
 import logging
 from agentstress import logger
-from agentstress.experiments.pilot_runner import run_pilot
-from agentstress.experiments.paper2_runner import run_paper2_experiment
-from agentstress.data.local_ledger import LocalLedger
 
 
 def main():
@@ -17,6 +14,7 @@ def main():
         help="Mode to run",
     )
     parser.add_argument("--mock", action="store_true", help="Run in mock mode without API calls")
+    parser.add_argument("--local", action="store_true", help="Use local Ollama for the agent")
 
     args = parser.parse_args()
 
@@ -25,10 +23,13 @@ def main():
         os.environ["AGENTSTRESS_MOCK"] = "True"
 
     if args.mode == "pilot":
-        run_pilot()
+        from agentstress.experiments.pilot_runner import run_pilot
+        run_pilot(use_local=args.local)
     elif args.mode == "experiment":
+        from agentstress.experiments.paper2_runner import run_paper2_experiment
         run_paper2_experiment()
     elif args.mode == "verify":
+        from agentstress.data.local_ledger import LocalLedger
         ledger = LocalLedger()
         if ledger.verify_ledger():
             logger.info(

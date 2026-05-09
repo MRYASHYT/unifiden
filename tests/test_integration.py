@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import time
+import importlib
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -14,6 +15,7 @@ from agentstress.evaluation.base_judge import (
     DebateJudgment,
 )
 from agentstress.data.local_ledger import LocalLedger
+from agentstress.experiments.pilot_runner import classify_failure_safely
 
 
 class MockAgent(BaseAgent):
@@ -97,3 +99,40 @@ def test_ledger_verifies_legacy_signed_entries():
 
     if os.path.exists(ledger_path):
         os.remove(ledger_path)
+
+
+def test_cli_import_is_mode_lazy():
+    """Importing the CLI should not import optional provider stacks for unused modes."""
+    sys.modules.pop("main", None)
+    sys.modules.pop("agentstress.experiments.paper2_runner", None)
+
+    importlib.import_module("main")
+
+    assert "agentstress.experiments.paper2_runner" not in sys.modules
+
+
+def test_pilot_records_provider_error_classification():
+    class FailingJudge:
+        def classify_failure(self, *args, **kwargs):
+            raise RuntimeError("provider auth failed")
+
+    score = RubricScore("task", "judge", [], ["required"], [], 0, 1, 0.0, "")
+    agent_result = AgentResult(
+        agent_id="agent",
+        architecture="test",
+        model="test",
+        instruction="instruction",
+        instruction_type="clear",
+        output="",
+        tool_calls=[],
+        completed=False,
+        error="agent auth failed",
+        run_id="1",
+    )
+
+    classification = classify_failure_safely(
+        FailingJudge(), "instruction", "clear", agent_result, score
+    )
+
+    assert classification.failure_mode == "PROVIDER_ERROR"
+    assert "provider auth failed" in classification.evidence

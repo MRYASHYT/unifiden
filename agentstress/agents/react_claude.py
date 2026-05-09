@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_community.tools import DuckDuckGoSearchRun
-from langchainhub import Client
 from tenacity import retry, wait_exponential, stop_after_attempt
 from agentstress.agents.base_agent import BaseAgent, AgentResult, ToolCall
+from agentstress.agents.react_prompt import build_react_prompt
+from agentstress.config import Config
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ class ReActClaudeAgent(BaseAgent):
     def __init__(
         self,
         agent_id: str = "agent_4_react_claude",
-        model: str = "claude-3-5-sonnet-latest",
+        model: str = Config.DEFAULT_CLAUDE_MODEL,
         temperature: float = 0.1,
     ):
         super().__init__(agent_id, model, temperature)
@@ -32,8 +33,7 @@ class ReActClaudeAgent(BaseAgent):
     def setup(self) -> None:
         """Initialize the Claude ReAct agent."""
         llm = ChatAnthropic(model=self.model, temperature=self.temperature)
-        client = Client()
-        prompt = client.pull("hwchase17/react")
+        prompt = build_react_prompt()
         agent = create_react_agent(llm, self.tools, prompt)
         self.executor = AgentExecutor(
             agent=agent,

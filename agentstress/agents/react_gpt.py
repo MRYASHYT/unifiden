@@ -6,11 +6,10 @@ from dotenv import load_dotenv
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_openai import ChatOpenAI
 from langchain_community.tools import DuckDuckGoSearchRun
-from langchainhub import Client
-from langchain_core.prompts import ChatPromptTemplate
 import json
 from tenacity import retry, wait_exponential, stop_after_attempt
 from agentstress.agents.base_agent import BaseAgent, AgentResult, ToolCall
+from agentstress.agents.react_prompt import build_react_prompt
 
 load_dotenv()
 
@@ -31,8 +30,7 @@ class ReActGPTAgent(BaseAgent):
     def setup(self) -> None:
         """Initialize the LangChain ReAct agent."""
         llm = ChatOpenAI(model=self.model, temperature=self.temperature)
-        client = Client()
-        prompt = client.pull("hwchase17/react")
+        prompt = build_react_prompt()
         agent = create_react_agent(llm, self.tools, prompt)
         self.executor = AgentExecutor(
             agent=agent,
