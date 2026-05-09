@@ -26,8 +26,8 @@ def main():
         from agentstress.experiments.pilot_runner import run_pilot
         run_pilot(use_local=args.local)
     elif args.mode == "experiment":
-        from agentstress.experiments.paper2_runner import run_paper2_experiment
-        run_paper2_experiment()
+        from agentstress.experiments.paper1_runner import run_paper1_experiment
+        run_paper1_experiment(use_local=args.local)
     elif args.mode == "verify":
         from agentstress.data.local_ledger import LocalLedger
         ledger = LocalLedger()
