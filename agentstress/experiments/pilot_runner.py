@@ -42,9 +42,11 @@ def run_pilot(use_local: bool = False):
     # 1. Initialize Components
     if use_local:
         from agentstress.agents.ollama_agent import OllamaAgent
-        from agentstress.evaluation.judge_gemini import GeminiJudge
+        from agentstress.evaluation.judge_ollama import OllamaJudge
         agent = OllamaAgent()
-        judge = GeminiJudge()
+        judge = OllamaJudge()
+        # Set env var for RubricEngine to know it's local
+        os.environ["AGENTSTRESS_LOCAL"] = "True"
     else:
         agent = ReActGPTAgent()
         judge = GPTJudge()
