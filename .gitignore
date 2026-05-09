@@ -2,7 +2,8 @@
 
 # Secrets
 .env
-.env.example
+.env.*
+!.env.example
 secrets.json
 
 # Security Keys (CRITICAL)
@@ -12,6 +13,7 @@ security/keys/
 
 # Ignore data files but KEEP the python modules
 data/*.jsonl
+agentstress/data/*.jsonl
 results/*.csv
 results/*.png
 results/*.json
@@ -23,6 +25,9 @@ __pycache__/
 *$py.class
 agentstress.log
 tests/test_keys/
+tests/temp_keys/
+tests/temp_ledger.jsonl
+*.egg-info/
 venv/
 .venv/
 

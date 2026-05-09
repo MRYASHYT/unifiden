@@ -1,11 +1,14 @@
-.PHONY: test lint run-pilot run-experiment run-dashboard clean
+.PHONY: test lint format run-pilot run-experiment run-dashboard clean
 
 test:
 	python -m pytest tests/
 
 lint:
-	flake8 agentstress/
-	black agentstress/
+	python -m flake8 agentstress/ tests/
+	black --check agentstress/ tests/
+
+format:
+	black agentstress/ tests/
 
 run-pilot:
 	python main.py --mode pilot
