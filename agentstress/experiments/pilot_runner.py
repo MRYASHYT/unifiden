@@ -54,7 +54,7 @@ def run_pilot(use_local: bool = False):
     ledger = LocalLedger()
 
     # 2. Setup Task
-    task_id = "clear_01"
+    task_id = "pilot_stock_01"
     instruction = "Find the current stock price of NVIDIA and calculate the market cap if there are 2.46 billion shares outstanding."
     instruction_type = "clear"
 

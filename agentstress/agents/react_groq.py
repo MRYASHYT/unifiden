@@ -1,0 +1,123 @@
+import os
+import time
+import uuid
+import dataclasses
+from typing import List, Dict, Any, Optional
+from dotenv import load_dotenv
+from langchain.agents import AgentExecutor, create_react_agent
+from langchain_groq import ChatGroq
+from langchain_community.tools import DuckDuckGoSearchRun
+from tenacity import retry, wait_exponential, stop_after_attempt
+from agentstress.agents.base_agent import BaseAgent, AgentResult, ToolCall
+from agentstress.agents.react_prompt import build_react_prompt
+
+load_dotenv()
+
+
+class ReActGroqAgent(BaseAgent):
+    """
+    Agent: ReAct + Groq (Llama 3 70B)
+    Ultra-fast inference for large-scale AgentStress experiments.
+    """
+
+    def __init__(
+        self,
+        agent_id: str = "agent_groq_react",
+        model: str = "llama-3.1-70b-versatile",
+        temperature: float = 0.1,
+    ):
+        super().__init__(agent_id, model, temperature)
+        self.executor = None
+        self.tools = [DuckDuckGoSearchRun()]
+
+    def setup(self) -> None:
+        """Initialize the LangChain ReAct agent with Groq."""
+        llm = ChatGroq(model=self.model, temperature=self.temperature)
+        prompt = build_react_prompt()
+        agent = create_react_agent(llm, self.tools, prompt)
+        self.executor = AgentExecutor(
+            agent=agent,
+            tools=self.tools,
+            verbose=True,
+            handle_parsing_errors=True,
+            max_iterations=15,
+            return_intermediate_steps=True,
+        )
+
+    def run(self, instruction: str, instruction_type: str) -> AgentResult:
+        """Executes the task using Groq and captures traces."""
+        if not self.executor:
+            self.setup()
+
+        start_time = time.time()
+        run_id = str(uuid.uuid4())
+
+        try:
+
+            @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(3))
+            def invoke_agent():
+                return self.executor.invoke({"input": instruction})
+
+            response = invoke_agent()
+            duration = time.time() - start_time
+
+            tool_calls = []
+            for i, (action, observation) in enumerate(response.get("intermediate_steps", [])):
+                tool_calls.append(
+                    ToolCall(
+                        step=i + 1,
+                        tool_name=action.tool,
+                        tool_input=str(action.tool_input),
+                        tool_output=str(observation),
+                        timestamp=time.time(),
+                        duration_ms=0,
+                    )
+                )
+
+            # Confidence assessment using Groq
+            llm = ChatGroq(model=self.model, temperature=self.temperature)
+
+            @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(3))
+            def invoke_assessment():
+                return llm.invoke(
+                    f"Rate confidence (0-10) for task performance: {instruction}. Return number only."
+                ).content
+
+            assess_res = invoke_assessment()
+            try:
+                import re
+                match = re.search(r'(\d+)', str(assess_res))
+                conf = int(match.group(1)) if match else 7
+            except Exception:
+                conf = 7
+
+            return AgentResult(
+                agent_id=self.agent_id,
+                architecture="ReAct",
+                model=self.model,
+                instruction=instruction,
+                instruction_type=instruction_type,
+                output=response.get("output", ""),
+                tool_calls=tool_calls,
+                total_steps=len(tool_calls),
+                duration_seconds=duration,
+                completed=True,
+                run_id=run_id,
+                confidence_self_assessment=conf,
+                steps_completed=[f"Step {i+1}: {tc.tool_name}" for i, tc in enumerate(tool_calls)],
+            )
+
+        except Exception as e:
+            duration = time.time() - start_time
+            return AgentResult(
+                agent_id=self.agent_id,
+                architecture="ReAct",
+                model=self.model,
+                instruction=instruction,
+                instruction_type=instruction_type,
+                output="",
+                completed=False,
+                error=str(e),
+                duration_seconds=duration,
+                run_id=run_id,
+            )
